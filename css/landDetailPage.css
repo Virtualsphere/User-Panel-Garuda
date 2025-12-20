@@ -1,0 +1,394 @@
+/* Land Details Page Specific Styles */
+
+/* Property Main Image */
+.property-main-image {
+    position: relative;
+    height: 400px;
+    overflow: hidden;
+    border-radius: 1rem 1rem 0 0;
+    cursor: pointer;
+}
+
+.property-main-image img {
+    transition: transform 0.3s ease;
+}
+
+.property-main-image:hover img {
+    transform: scale(1.02);
+}
+
+.image-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.image-nav-btn:hover {
+    background: white;
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.image-nav-prev {
+    left: 1rem;
+}
+
+.image-nav-next {
+    right: 1rem;
+}
+
+.image-counter {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.25rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Thumbnails */
+.thumbnail-item {
+    border: 2px solid transparent;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.thumbnail-item:hover {
+    border-color: var(--success);
+    transform: translateY(-2px);
+}
+
+.thumbnail-item.active {
+    border-color: var(--success);
+    box-shadow: 0 0 0 2px var(--success);
+}
+
+.thumbnail-item img {
+    height: 80px;
+    object-fit: cover;
+}
+
+/* Property Detail Cards */
+.property-detail-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 0.75rem;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+    height: 100%;
+}
+
+.property-detail-card:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.property-detail-icon {
+    font-size: 1.5rem;
+    color: #6c757d;
+    flex-shrink: 0;
+}
+
+.property-detail-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.property-detail-value {
+    font-weight: 600;
+    color: #212529;
+}
+
+/* Property Feature Cards */
+.property-feature-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 0.75rem;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+    height: 100%;
+}
+
+.property-feature-card:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.property-feature-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.5rem;
+    background: var(--success);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.property-feature-name {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.property-feature-value {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* Document Cards */
+.document-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 0.75rem;
+    border: 1px solid #e9ecef;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+    height: 100%;
+}
+
+.document-card:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+    color: inherit;
+}
+
+.document-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.document-name {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.document-info {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* Location Detail Cards */
+.location-detail-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 0.75rem;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.location-detail-card:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.location-icon {
+    font-size: 1.5rem;
+    color: #6c757d;
+    flex-shrink: 0;
+}
+
+.location-detail-name {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.location-detail-value {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* Owner Details */
+.owner-detail {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.owner-detail:last-child {
+    border-bottom: none;
+}
+
+.owner-icon {
+    font-size: 1.25rem;
+    color: #6c757d;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.owner-name {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.125rem;
+}
+
+.owner-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* Legal Status */
+.legal-status-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #fff8e1;
+    border-radius: 0.75rem;
+    border: 1px solid #ffe082;
+    margin-bottom: 1rem;
+}
+
+.legal-icon {
+    font-size: 1.5rem;
+    color: #ff9800;
+    flex-shrink: 0;
+}
+
+.legal-status-name {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.legal-status-value {
+    font-size: 0.875rem;
+    color: #ff9800;
+    font-weight: 500;
+}
+
+.legal-detail {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0;
+}
+
+.legal-detail-name {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.125rem;
+}
+
+.legal-detail-value {
+    font-weight: 600;
+    color: #212529;
+}
+
+/* Modal Navigation */
+.modal-nav-prev {
+    left: 2rem;
+}
+
+.modal-nav-next {
+    right: 2rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .property-main-image {
+        height: 250px;
+    }
+    
+    .image-nav-btn {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .thumbnail-item img {
+        height: 60px;
+    }
+    
+    .property-detail-card,
+    .property-feature-card,
+    .document-card {
+        padding: 0.75rem;
+    }
+    
+    .property-detail-icon,
+    .document-icon,
+    .location-icon {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .property-main-image {
+        height: 200px;
+    }
+    
+    .image-counter {
+        font-size: 0.75rem;
+        padding: 0.125rem 0.75rem;
+    }
+}
+
+/* Tab Styling */
+.nav-tabs .nav-link {
+    color: #6c757d;
+    border: none;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--success);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--success);
+    background: none;
+    border: none;
+    border-bottom: 3px solid var(--success);
+}
+
+/* Space Utilities */
+.space-y-3 > * + * {
+    margin-top: 0.75rem;
+}
+
+.space-y-4 > * + * {
+    margin-top: 1rem;
+}
+
+/* Object Fit Utilities */
+.object-fit-cover {
+    object-fit: cover;
+}

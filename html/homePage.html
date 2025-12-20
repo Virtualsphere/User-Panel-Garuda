@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garuda Lands - Discover Your Perfect Land</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/homePage.css">
+</head>
+<body>
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="mobile-menu">
+        <div class="mobile-menu-content">
+            <div class="d-flex align-items-center justify-content-between p-4 border-bottom">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-compass fs-3 text-success me-2"></i>
+                    <span class="fs-3 fw-bold text-dark">GARUDA</span>
+                    <span class="text-success fw-bold">LANDS</span>
+                </div>
+                <button id="closeMobileMenu" class="btn p-2">
+                    <i class="bi bi-x-lg fs-4"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <a href="homePage.html" class="mobile-menu-item btn btn-link text-start w-100 text-decoration-none">Home</a>
+                <a href="landPage.html" class="mobile-menu-item btn btn-link text-start w-100 text-decoration-none">Browse Lands</a>
+                <button class="mobile-menu-item">About</button>
+                <button class="mobile-menu-item">Contact</button>
+                
+                <div class="pt-4 mt-4">
+                    <button id="mobileSignUp" class="btn btn-success w-100 mb-3 py-3">Sign Up</button>
+                    <button id="mobileSignIn" class="btn btn-outline-success w-100 py-3">Sign In</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-container">
+            <button id="closeLoginModal" class="modal-close-btn">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <div class="p-4 p-md-5">
+                <div class="text-center mb-5">
+                    <div class="d-flex align-items-center justify-content-center mb-4">
+                        <i class="bi bi-compass fs-1 text-success me-2"></i>
+                        <span class="fs-2 fw-bold">GARUDA</span>
+                        <span class="text-success fw-bold">LANDS</span>
+                    </div>
+                    <h2 class="fw-bold">Welcome Back</h2>
+                    <p class="text-muted">Sign in to access your account</p>
+                </div>
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label class="form-label">Email or Phone</label>
+                        <input type="text" class="form-control" placeholder="Enter email or phone" id="loginIdentifier" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" placeholder="Enter password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 py-3">Sign In</button>
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <p class="text-muted">
+                            Don't have an account? 
+                            <a href="#" class="text-success fw-medium" id="openSignupFromLogin">Sign up</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="modal-overlay">
+        <div class="modal-container">
+            <button id="closeSignupModal" class="modal-close-btn">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <div class="p-4 p-md-5">
+                <div class="text-center mb-5">
+                    <div class="d-flex align-items-center justify-content-center mb-4">
+                        <i class="bi bi-person-plus fs-1 text-success me-2"></i>
+                        <span class="fs-2 fw-bold">GARUDA</span>
+                        <span class="text-success fw-bold">LANDS</span>
+                    </div>
+                    <h2 class="fw-bold">Create Account</h2>
+                    <p class="text-muted">Signing up is easy. It only takes a few steps.</p>
+                </div>
+                <form id="signupForm">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" placeholder="Full Name" id="signupName" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="email" class="form-control" placeholder="Email Address" id="signupEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="tel" class="form-control" placeholder="Phone Number" id="signupPhone" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" class="form-control" placeholder="Password" id="signupPassword" minlength="6" required>
+                    </div>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                        <label class="form-check-label small" for="agreeTerms">
+                            I agree to all Terms & Conditions and Privacy Policy
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 py-3" id="signupSubmitBtn">
+                        <span id="signupBtnText">CREATE ACCOUNT</span>
+                        <div id="signupSpinner" class="spinner-border spinner-border-sm text-light ms-2 d-none" role="status"></div>
+                    </button>
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <p class="text-muted">
+                            Already have an account? 
+                            <a href="#" class="text-success fw-medium" id="openLoginFromSignup">Sign in</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="min-vh-100 bg-light">
+        <!-- Hero Section -->
+        <header class="hero-section">
+            <!-- Navigation -->
+            <nav class="navbar navbar-expand-lg py-3">
+                <div class="container">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-compass fs-3 text-success me-2"></i>
+                        <span class="fs-3 fw-bold text-white">GARUDA</span>
+                        <span class="text-success fw-bold">LANDS</span>
+                    </div>
+                    
+                    <button class="navbar-toggler border-0 text-white" id="mobileMenuBtn">
+                        <i class="bi bi-list fs-2"></i>
+                    </button>
+                    
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto align-items-center">
+                            <li class="nav-item"><a href="homePage.html" class="nav-link text-white">Home</a></li>
+                            <li class="nav-item"><a href="landPage.html" class="nav-link text-white browse-lands">Browse Lands</a></li>
+                            <li class="nav-item"><a href="#" class="nav-link text-white">About</a></li>
+                            <li class="nav-item"><a href="#" class="nav-link text-white">Contact</a></li>
+                            <li class="nav-item ms-3"><button id="navSignUp" class="btn btn-outline-light">Sign Up</button></li>
+                            <li class="nav-item ms-2"><button id="navSignIn" class="btn btn-outline-light">Sign In</button></li>
+                            <li class="nav-item ms-2"><button class="btn btn-success">Land Inquiry</button></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Hero Content -->
+            <div class="hero-content">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-10 text-center">
+                            <h1 class="display-4 fw-bold mb-4">
+                                Discover Your Perfect <span class="text-success">Land</span>
+                            </h1>
+                            <p class="lead mb-5">
+                                From agricultural acres to development plots, find the land that matches your vision with Garuda Lands.
+                            </p>
+                            
+                            <!-- Search Bar -->
+                            <div class="search-box">
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-transparent border-0">
+                                                <i class="bi bi-search text-muted"></i>
+                                            </span>
+                                            <input type="text" class="form-control border-0" placeholder="Search by state, county, acreage, or land type..." id="searchInput">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select">
+                                            <option>Land Type</option>
+                                            <option>Agricultural</option>
+                                            <option>Development</option>
+                                            <option>Recreational</option>
+                                            <option>Industrial</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-success w-100 py-3">
+                                            <i class="bi bi-search me-2"></i>Find Land
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Section -->
+        <section class="stats-section py-5">
+            <div class="container">
+                <div class="row">
+                    <div class="col-6 col-md-3 text-center mb-4">
+                        <div class="stat-icon mb-3">
+                            <i class="bi bi-award fs-3 text-success"></i>
+                        </div>
+                        <h2 class="fw-bold">15,000+</h2>
+                        <p class="text-muted">Acres Sold</p>
+                    </div>
+                    <div class="col-6 col-md-3 text-center mb-4">
+                        <div class="stat-icon mb-3">
+                            <i class="bi bi-shield-check fs-3 text-success"></i>
+                        </div>
+                        <h2 class="fw-bold">98%</h2>
+                        <p class="text-muted">Client Satisfaction</p>
+                    </div>
+                    <div class="col-6 col-md-3 text-center mb-4">
+                        <div class="stat-icon mb-3">
+                            <i class="bi bi-graph-up fs-3 text-success"></i>
+                        </div>
+                        <h2 class="fw-bold">$2.5B+</h2>
+                        <p class="text-muted">Total Transactions</p>
+                    </div>
+                    <div class="col-6 col-md-3 text-center mb-4">
+                        <div class="stat-icon mb-3">
+                            <i class="bi bi-compass fs-3 text-success"></i>
+                        </div>
+                        <h2 class="fw-bold">40+</h2>
+                        <p class="text-muted">States Covered</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Lands -->
+        <section class="py-5 bg-light">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold mb-3">Featured Land Properties</h2>
+                    <p class="text-muted">Carefully selected lands with verified titles, clear zoning, and development potential</p>
+                </div>
+
+                <!-- Land Filters -->
+                <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                    <button class="btn btn-success btn-sm rounded-pill">All</button>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill">Agricultural</button>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill">Development</button>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill">Recreational</button>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill">Industrial</button>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill">Timber</button>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill">Residential</button>
+                </div>
+
+                <!-- Lands Grid -->
+                <div class="row" id="landsGrid">
+                    <!-- Lands will be loaded by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Land Types -->
+        <section class="py-5">
+            <div class="container">
+                <h2 class="text-center fw-bold mb-5">Browse by Land Type</h2>
+                <div class="row g-4">
+                    <div class="col-6 col-md-4 col-lg-2 text-center">
+                        <div class="land-type-card p-3">
+                            <div class="land-type-icon mb-3">
+                                <i class="bi bi-tree fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold">Agricultural</h5>
+                            <p class="text-muted small">342 Properties</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2 text-center">
+                        <div class="land-type-card p-3">
+                            <div class="land-type-icon mb-3">
+                                <i class="bi bi-mountain fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold">Development</h5>
+                            <p class="text-muted small">189 Properties</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2 text-center">
+                        <div class="land-type-card p-3">
+                            <div class="land-type-icon mb-3">
+                                <i class="bi bi-droplet fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold">Waterfront</h5>
+                            <p class="text-muted small">156 Properties</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2 text-center">
+                        <div class="land-type-card p-3">
+                            <div class="land-type-icon mb-3">
+                                <i class="bi bi-building fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold">Industrial</h5>
+                            <p class="text-muted small">98 Properties</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2 text-center">
+                        <div class="land-type-card p-3">
+                            <div class="land-type-icon mb-3">
+                                <i class="bi bi-sun fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold">Solar</h5>
+                            <p class="text-muted small">67 Properties</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2 text-center">
+                        <div class="land-type-card p-3">
+                            <div class="land-type-icon mb-3">
+                                <i class="bi bi-compass fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold">Recreational</h5>
+                            <p class="text-muted small">234 Properties</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Land Features -->
+        <section class="py-5 bg-success bg-opacity-10">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold mb-3">Complete Land Services</h2>
+                    <p class="text-muted">We handle every aspect of land transactions for you</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="feature-card p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="bi bi-droplet fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold">Water Rights Included</h5>
+                            <p class="text-muted small">Full legal water rights with documented sources</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="feature-card p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="bi bi-mountain fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold">Mineral Rights Available</h5>
+                            <p class="text-muted small">Ownership of subsurface minerals negotiable</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="feature-card p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="bi bi-ruler fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold">Survey & Title Ready</h5>
+                            <p class="text-muted small">Recent surveys and clear titles provided</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="feature-card p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="bi bi-lightning-charge fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold">Utility Access</h5>
+                            <p class="text-muted small">Power, water, and internet infrastructure available</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Land Use Cases -->
+        <section class="py-5">
+            <div class="container">
+                <h2 class="text-center fw-bold mb-5">Popular Land Uses</h2>
+                <div class="row g-3">
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="use-case-card bg-success bg-opacity-10 text-success p-3 text-center">
+                            <div class="fs-2 mb-2">🌾</div>
+                            <div class="fw-bold">Farming</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="use-case-card bg-warning bg-opacity-10 text-warning p-3 text-center">
+                            <div class="fs-2 mb-2">🐄</div>
+                            <div class="fw-bold">Ranching</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="use-case-card bg-info bg-opacity-10 text-info p-3 text-center">
+                            <div class="fs-2 mb-2">☀️</div>
+                            <div class="fw-bold">Solar Farm</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="use-case-card bg-success bg-opacity-10 text-success p-3 text-center">
+                            <div class="fs-2 mb-2">🌲</div>
+                            <div class="fw-bold">Timber</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="use-case-card bg-primary bg-opacity-10 text-primary p-3 text-center">
+                            <div class="fs-2 mb-2">🏗️</div>
+                            <div class="fw-bold">Development</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="use-case-card bg-teal bg-opacity-10 text-teal p-3 text-center">
+                            <div class="fs-2 mb-2">🦉</div>
+                            <div class="fw-bold">Conservation</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section class="py-5 bg-light">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold mb-3">Land Owners & Investors Trust Garuda</h2>
+                    <p class="text-muted">Success stories from our land transactions</p>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="testimonial-card p-4 p-md-5">
+                            <div class="text-center mb-4">
+                                <i class="bi bi-star-fill text-warning fs-5"></i>
+                                <i class="bi bi-star-fill text-warning fs-5"></i>
+                                <i class="bi bi-star-fill text-warning fs-5"></i>
+                                <i class="bi bi-star-fill text-warning fs-5"></i>
+                                <i class="bi bi-star-fill text-warning fs-5"></i>
+                            </div>
+                            <p class="fs-5 fst-italic text-center mb-4" id="testimonialText">
+                                "Found perfect 100-acre farmland with Garuda. Their expertise in agricultural zoning was invaluable."
+                            </p>
+                            <div class="text-center">
+                                <h5 class="fw-bold" id="testimonialName">James Wilson</h5>
+                                <p class="text-muted" id="testimonialRole">Farm Investor</p>
+                            </div>
+                            <div class="d-flex justify-content-center mt-4">
+                                <button class="btn btn-outline-secondary me-3" id="prevTestimonial">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <div class="d-flex align-items-center">
+                                    <button class="testimonial-dot active"></button>
+                                    <button class="testimonial-dot"></button>
+                                    <button class="testimonial-dot"></button>
+                                </div>
+                                <button class="btn btn-outline-secondary ms-3" id="nextTestimonial">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-5 bg-success text-white">
+            <div class="container">
+                <div class="row justify-content-center text-center">
+                    <div class="col-lg-8">
+                        <h2 class="fw-bold mb-4">Ready to Own Your Piece of India?</h2>
+                        <p class="lead mb-5 opacity-75">
+                            Join successful investors who've built their legacy with Garuda Lands
+                        </p>
+                        <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+                            <button class="btn btn-light text-success px-4 py-3 fw-bold">Browse Available Lands</button>
+                            <button id="ctaSignUp" class="btn btn-outline-light px-4 py-3 fw-bold">Start Free Account</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-white py-5">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-3 mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-compass fs-3 text-success me-2"></i>
+                            <div>
+                                <span class="fs-3 fw-bold">GARUDA</span>
+                                <span class="text-success fw-bold">LANDS</span>
+                            </div>
+                        </div>
+                        <p class="text-white">
+                            Your trusted partner in land acquisition and development since 1985.
+                        </p>
+                    </div>
+                    <div class="col-lg-3 mb-4">
+                        <h5 class="mb-3">Land Categories</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="#" class="text-white text-decoration-none">Agricultural Land</a></li>
+                            <li><a href="#" class="text-white text-decoration-none">Development Land</a></li>
+                            <li><a href="#" class="text-white text-decoration-none">Recreational Land</a></li>
+                            <li><a href="#" class="text-white text-decoration-none">Investment Land</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-3 mb-4">
+                        <h5 class="mb-3">Services</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="#" class="text-white text-decoration-none">Land Surveying</a></li>
+                            <li><a href="#" class="text-white text-decoration-none">Title Research</a></li>
+                            <li><a href="#" class="text-white text-decoration-none">Zoning Analysis</a></li>
+                            <li><a href="#" class="text-white text-decoration-none">Land Valuation</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-3 mb-4">
+                        <h5 class="mb-3">Contact Us</h5>
+                        <div class="text-white">
+                            <div class="mb-2">
+                                <i class="bi bi-telephone text-success me-2"></i>
+                                1-800-GARUDA-LAND
+                            </div>
+                            <div class="mb-2">
+                                <i class="bi bi-envelope text-success me-2"></i>
+                                info@garudalands.com
+                            </div>
+                            <div>
+                                <i class="bi bi-geo-alt text-success me-2"></i>
+                                500 Landmark Plaza<br>
+                                Denver, CO 80202
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center pt-4 border-top border-secondary">
+                    <p class="text-white mb-0">
+                        &copy; 1985-2024 Garuda Lands. All rights reserved. | Licensed in 40 states
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../javascript/homePage.js"></script>
+</body>
+</html>

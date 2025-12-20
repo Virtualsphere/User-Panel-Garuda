@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garuda Lands - Property Details</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/landDetailPage.css">
+</head>
+<body>
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="mobile-menu d-md-none">
+        <div class="mobile-menu-content">
+            <div class="mobile-menu-header d-flex justify-content-between align-items-center p-3 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-compass text-success fs-4"></i>
+                    <span class="fs-5 fw-bold">GARUDA</span>
+                    <span class="text-success fw-bold">LANDS</span>
+                </div>
+                <button id="closeMobileMenu" class="btn">
+                    <i class="bi bi-x fs-4"></i>
+                </button>
+            </div>
+            <div class="mobile-menu-body p-3">
+                <button id="mobileContactBtn" class="btn btn-success w-100 mb-3">Contact Owner</button>
+                <button id="mobileVisitBtn" class="btn btn-outline-success w-100 mb-3">Schedule Site Visit</button>
+                <button id="mobileShareBtn" class="btn btn-outline-secondary w-100">Share Property</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="d-md-none sticky-top bg-white shadow-sm">
+        <div class="px-3 py-3 d-flex align-items-center justify-content-between">
+            <button id="backToLandingBtn" class="btn">
+                <i class="bi bi-arrow-left fs-5"></i>
+            </button>
+            
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-compass text-success fs-4"></i>
+                <span class="fs-5 fw-bold">GARUDA</span>
+                <span class="text-success fw-bold">LANDS</span>
+            </div>
+            
+            <button id="openMobileMenu" class="btn">
+                <i class="bi bi-list fs-5"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <nav class="d-none d-md-block bg-white shadow-sm px-4 py-3">
+        <div class="container d-flex align-items-center justify-content-between">
+            <div>
+                <button id="backToLandingDesktopBtn" class="btn text-muted">
+                    <i class="bi bi-chevron-left me-1"></i>
+                    Back to Listings
+                </button>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-compass text-success fs-3"></i>
+                <span class="fs-4 fw-bold">GARUDA</span>
+                <span class="text-success fw-bold">LANDS</span>
+            </div>
+            <button id="desktopContactBtn" class="btn btn-success">
+                Contact Owner
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container py-4">
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-5">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 text-muted">Loading land details...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="text-center py-5 d-none">
+            <div class="text-danger fs-1 mb-3">⚠️</div>
+            <h3 class="fw-bold mb-2">Error Loading Land Details</h3>
+            <p id="errorMessage" class="text-muted mb-4"></p>
+            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                <button id="backToLandingErrorBtn" class="btn btn-secondary">Back to Listings</button>
+                <button id="retryBtn" class="btn btn-success">Retry</button>
+            </div>
+        </div>
+
+        <!-- Property Content -->
+        <div id="propertyContent" class="d-none">
+            <!-- Mobile Property Header -->
+            <div id="mobilePropertyHeader" class="d-md-none bg-white rounded-3 shadow-sm p-4 mb-4">
+                <h1 id="mobilePropertyTitle" class="fs-5 fw-bold mb-2"></h1>
+                <div class="d-flex align-items-center text-muted mb-3">
+                    <i class="bi bi-geo-alt me-2"></i>
+                    <span id="mobilePropertyLocation" class="small text-truncate"></span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div id="mobilePropertyPrice" class="fs-5 fw-bold text-success"></div>
+                        <div id="mobilePropertyPricePerAcre" class="small text-muted"></div>
+                    </div>
+                    <div class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Verified
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop Property Header -->
+            <div class="d-none d-md-block bg-white rounded-3 shadow-sm p-5 mb-5">
+                <div class="row align-items-center">
+                    <div class="col-8">
+                        <h1 id="desktopPropertyTitle" class="fs-3 fw-bold mb-2"></h1>
+                        <div class="d-flex align-items-center text-muted">
+                            <i class="bi bi-geo-alt me-2"></i>
+                            <span id="desktopPropertyLocation"></span>
+                        </div>
+                    </div>
+                    <div class="col-4 text-end">
+                        <div id="desktopPropertyPrice" class="fs-3 fw-bold text-success mb-1"></div>
+                        <div id="desktopPropertyPricePerAcre" class="text-muted"></div>
+                        <div class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill mt-2">
+                            <i class="bi bi-shield-check me-1"></i>
+                            Verified Property
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Left Column - Images & Details -->
+                <div class="col-lg-8">
+                    <!-- Image Gallery -->
+                    <div class="bg-white rounded-3 shadow-sm overflow-hidden mb-4">
+                        <div class="position-relative">
+                            <div id="mainImageContainer" class="property-main-image">
+                                <img id="mainImage" src="" alt="Property" class="w-100 h-100 object-fit-cover">
+                                <!-- Navigation Arrows -->
+                                <button id="prevImageBtn" class="image-nav-btn image-nav-prev">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <button id="nextImageBtn" class="image-nav-btn image-nav-next">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                                <!-- Image Counter -->
+                                <div class="image-counter">
+                                    <span id="currentImageIndex">1</span> / <span id="totalImages">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Thumbnails -->
+                        <div id="thumbnailsContainer" class="p-3 bg-light">
+                            <div id="thumbnailsRow" class="row g-2">
+                                <!-- Thumbnails will be added here by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Actions -->
+                    <div class="d-md-none d-flex gap-2 mb-4">
+                        <button id="mobileQuickContactBtn" class="btn btn-success flex-grow-1">
+                            <i class="bi bi-telephone me-2"></i>
+                            Contact Owner
+                        </button>
+                        <button id="mobileFavoriteBtn" class="btn btn-outline-secondary">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                        <button id="mobileQuickShareBtn" class="btn btn-outline-secondary">
+                            <i class="bi bi-share"></i>
+                        </button>
+                    </div>
+
+                    <!-- Tabs Navigation -->
+                    <div class="bg-white rounded-3 shadow-sm overflow-hidden mb-4">
+                        <ul class="nav nav-tabs" id="propertyTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button">
+                                    Overview
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="features-tab" data-bs-toggle="tab" data-bs-target="#features" type="button">
+                                    Features
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button">
+                                    Documents
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="location-tab" data-bs-toggle="tab" data-bs-target="#location" type="button">
+                                    Location
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content p-4" id="propertyTabsContent">
+                            <!-- Overview Tab -->
+                            <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                                <h3 class="fw-bold mb-4">Property Overview</h3>
+                                <p id="propertyDescription" class="text-muted mb-4"></p>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="property-detail-card">
+                                            <i class="bi bi-ruler property-detail-icon"></i>
+                                            <div>
+                                                <div class="property-detail-label">Land Area</div>
+                                                <div id="landArea" class="property-detail-value"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="property-detail-card">
+                                            <i class="bi bi-droplet property-detail-icon text-primary"></i>
+                                            <div>
+                                                <div class="property-detail-label">Water Source</div>
+                                                <div id="waterSource" class="property-detail-value"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="property-detail-card">
+                                            <i class="bi bi-tree property-detail-icon text-success"></i>
+                                            <div>
+                                                <div class="property-detail-label">Garden</div>
+                                                <div id="garden" class="property-detail-value"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="property-detail-card">
+                                            <i class="bi bi-house property-detail-icon text-warning"></i>
+                                            <div>
+                                                <div class="property-detail-label">Residential</div>
+                                                <div id="residential" class="property-detail-value"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Features Tab -->
+                            <div class="tab-pane fade" id="features" role="tabpanel">
+                                <h3 class="fw-bold mb-4">Property Features</h3>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="property-feature-card">
+                                            <div class="property-feature-icon">
+                                                <i class="bi bi-shield-check"></i>
+                                            </div>
+                                            <div>
+                                                <div class="property-feature-name">Fencing</div>
+                                                <div id="fencing" class="property-feature-value"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="property-feature-card">
+                                            <div class="property-feature-icon">
+                                                <i class="bi bi-droplet"></i>
+                                            </div>
+                                            <div>
+                                                <div class="property-feature-name">Farm Pond</div>
+                                                <div id="farmPond" class="property-feature-value"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="property-feature-card">
+                                            <div class="property-feature-icon">
+                                                <i class="bi bi-building"></i>
+                                            </div>
+                                            <div>
+                                                <div class="property-feature-name">Shed Details</div>
+                                                <div id="shedDetails" class="property-feature-value"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="property-feature-card">
+                                            <div class="property-feature-icon">
+                                                <i class="bi bi-truck"></i>
+                                            </div>
+                                            <div>
+                                                <div class="property-feature-name">Road Access</div>
+                                                <div id="roadAccess" class="property-feature-value"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Documents Tab -->
+                            <div class="tab-pane fade" id="documents" role="tabpanel">
+                                <h3 class="fw-bold mb-4">Documents & Media</h3>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <a id="passbookLink" href="#" target="_blank" class="document-card">
+                                            <i class="bi bi-credit-card document-icon text-success"></i>
+                                            <div>
+                                                <div class="document-name">Passbook Photo</div>
+                                                <div class="document-info">View document</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a id="borderMapLink" href="#" target="_blank" class="document-card">
+                                            <i class="bi bi-image document-icon text-primary"></i>
+                                            <div>
+                                                <div class="document-name">Land Border Map</div>
+                                                <div class="document-info">View image</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="document-card">
+                                            <i class="bi bi-images document-icon text-muted"></i>
+                                            <div>
+                                                <div class="document-name">Land Photos</div>
+                                                <div id="photoCount" class="document-info">0 images available</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="document-card">
+                                            <i class="bi bi-camera-video document-icon text-danger"></i>
+                                            <div>
+                                                <div class="document-name">Property Video</div>
+                                                <div id="videoCount" class="document-info">0 videos available</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Location Tab -->
+                            <div class="tab-pane fade" id="location" role="tabpanel">
+                                <h3 class="fw-bold mb-4">Location Details</h3>
+                                <div class="space-y-4">
+                                    <div class="location-detail-card">
+                                        <i class="bi bi-geo-alt location-icon"></i>
+                                        <div>
+                                            <div class="location-detail-name">GPS Coordinates</div>
+                                            <div id="gpsCoordinates" class="location-detail-value"></div>
+                                        </div>
+                                    </div>
+                                    <div class="location-detail-card">
+                                        <i class="bi bi-truck location-icon"></i>
+                                        <div>
+                                            <div class="location-detail-name">Road Access</div>
+                                            <div id="roadAccessDetail" class="location-detail-value"></div>
+                                        </div>
+                                    </div>
+                                    <div class="location-detail-card">
+                                        <i class="bi bi-globe location-icon"></i>
+                                        <div>
+                                            <div class="location-detail-name">Path to Land</div>
+                                            <div id="pathToLand" class="location-detail-value"></div>
+                                        </div>
+                                    </div>
+                                    <button id="viewOnMapsBtn" class="btn btn-success">
+                                        <i class="bi bi-compass me-2"></i>
+                                        View on Google Maps
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video Section -->
+                    <div id="videoSection" class="bg-white rounded-3 shadow-sm p-4 d-none">
+                        <h3 class="fw-bold mb-3">
+                            <i class="bi bi-camera-video text-success me-2"></i>
+                            Property Video
+                        </h3>
+                        <div class="ratio ratio-16x9 bg-dark rounded">
+                            <video id="propertyVideo" controls class="w-100 h-100">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Owner Info & Actions -->
+                <div class="col-lg-4">
+                    <!-- Owner Information -->
+                    <div class="bg-white rounded-3 shadow-sm p-4 mb-4">
+                        <h3 class="fw-bold mb-3">
+                            <i class="bi bi-person text-success me-2"></i>
+                            Owner Information
+                        </h3>
+                        
+                        <div class="space-y-3">
+                            <div class="owner-detail">
+                                <i class="bi bi-person-circle owner-icon"></i>
+                                <div>
+                                    <div id="ownerName" class="owner-name"></div>
+                                    <div class="owner-label">Owner</div>
+                                </div>
+                            </div>
+                            
+                            <div class="owner-detail">
+                                <i class="bi bi-telephone owner-icon"></i>
+                                <div>
+                                    <div id="ownerPhone" class="owner-name"></div>
+                                    <div class="owner-label">Phone Number</div>
+                                </div>
+                            </div>
+                            
+                            <div class="owner-detail">
+                                <i class="bi bi-mortarboard owner-icon"></i>
+                                <div>
+                                    <div id="ownerEducation" class="owner-name"></div>
+                                    <div class="owner-label">Education Level</div>
+                                </div>
+                            </div>
+                            
+                            <div class="owner-detail">
+                                <i class="bi bi-clock owner-icon"></i>
+                                <div>
+                                    <div id="ownerAge" class="owner-name"></div>
+                                    <div class="owner-label">Age Group</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button id="ownerContactBtn" class="btn btn-success w-100 mt-4">
+                            Contact Owner
+                        </button>
+                    </div>
+
+                    <!-- Legal Status -->
+                    <div class="bg-white rounded-3 shadow-sm p-4 mb-4">
+                        <h3 class="fw-bold mb-3">
+                            <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                            Legal Status
+                        </h3>
+                        
+                        <div class="space-y-3">
+                            <div id="disputeStatus" class="legal-status-card">
+                                <i class="bi bi-exclamation-triangle legal-icon"></i>
+                                <div>
+                                    <div class="legal-status-name">Dispute Status</div>
+                                    <div id="disputeType" class="legal-status-value"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="legal-detail">
+                                <i class="bi bi-shield-check legal-icon"></i>
+                                <div>
+                                    <div class="legal-detail-name">Land Ownership</div>
+                                    <div id="landOwnership" class="legal-detail-value"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="legal-detail">
+                                <i class="bi bi-bank legal-icon"></i>
+                                <div>
+                                    <div class="legal-detail-name">Mortgage</div>
+                                    <div id="mortgageStatus" class="legal-detail-value"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-3 shadow-sm p-4">
+                        <h3 class="fw-bold mb-3">Quick Actions</h3>
+                        
+                        <div class="d-grid gap-2">
+                            <button id="scheduleVisitBtn" class="btn btn-primary">
+                                <i class="bi bi-calendar me-2"></i>
+                                Schedule Site Visit
+                            </button>
+                            
+                            <button id="downloadBrochureBtn" class="btn btn-outline-success">
+                                <i class="bi bi-download me-2"></i>
+                                Download Brochure
+                            </button>
+                            
+                            <button id="sharePropertyBtn" class="btn btn-outline-secondary">
+                                <i class="bi bi-share me-2"></i>
+                                Share Property
+                            </button>
+
+                            <button id="printDetailsBtn" class="btn btn-outline-secondary">
+                                <i class="bi bi-printer me-2"></i>
+                                Print Details
+                            </button>
+                        </div>
+
+                        <!-- Desktop Action Buttons -->
+                        <div class="d-none d-md-flex gap-2 mt-3">
+                            <button id="savePropertyBtn" class="btn btn-outline-secondary flex-grow-1">
+                                <i class="bi bi-heart me-1"></i>
+                                Save
+                            </button>
+                            <button id="desktopShareBtn" class="btn btn-outline-secondary flex-grow-1">
+                                <i class="bi bi-share me-1"></i>
+                                Share
+                            </button>
+                            <button id="reportPropertyBtn" class="btn btn-outline-secondary flex-grow-1">
+                                <i class="bi bi-flag me-1"></i>
+                                Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Image Gallery Modal -->
+    <div class="modal fade" id="imageGalleryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-0">
+                    <div class="d-flex align-items-center gap-3">
+                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg fs-4"></i>
+                        </button>
+                        <div class="text-white fs-5">
+                            <span id="modalImageIndex">1</span> / <span id="modalTotalImages">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body d-flex align-items-center justify-content-center p-0">
+                    <div id="modalImageContainer" class="text-center">
+                        <img id="modalImage" src="" alt="Property" class="img-fluid">
+                    </div>
+                    <button id="modalPrevBtn" class="image-nav-btn modal-nav-prev">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button id="modalNextBtn" class="image-nav-btn modal-nav-next">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Floating Action Button -->
+    <div class="d-md-none fixed-bottom end-0 m-3">
+        <button id="mobileFloatingBtn" class="btn btn-success rounded-circle p-3 shadow-lg">
+            <i class="bi bi-telephone fs-5"></i>
+        </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5 mt-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-compass text-success fs-3"></i>
+                        <div>
+                            <span class="fs-4 fw-bold">GARUDA</span>
+                            <span class="text-success fw-bold"> LANDS</span>
+                        </div>
+                    </div>
+                    <p class="text-white">
+                        Your trusted partner in land acquisition and development.
+                    </p>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <h5 class="fw-semibold mb-3">Land Categories</h5>
+                    <ul class="list-unstyled text-white">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-white hover-success">Agricultural Land</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-white hover-success">Development Land</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-white hover-success">Recreational Land</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-white hover-success">Investment Land</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <h5 class="fw-semibold mb-3">Services</h5>
+                    <ul class="list-unstyled text-white">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-white hover-success">Land Surveying</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-white hover-success">Title Research</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-white hover-success">Zoning Analysis</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-white hover-success">Land Valuation</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <h5 class="fw-semibold mb-3">Contact Us</h5>
+                    <div class="text-white">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-telephone text-success me-2"></i>
+                            <span>1-800-GARUDA-LAND</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-envelope text-success me-2"></i>
+                            <span>info@garudalands.com</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="border-secondary my-4">
+            <div class="text-center text-white">
+                <p>&copy; 2024 Garuda Lands. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="../javascript/landDetailPage.js"></script>
+</body>
+</html>
