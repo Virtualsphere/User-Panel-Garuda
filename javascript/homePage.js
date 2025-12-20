@@ -134,83 +134,198 @@ const testimonialDots = document.querySelectorAll('.testimonial-dot');
 const signupSubmitBtn = document.getElementById('signupSubmitBtn');
 const signupBtnText = document.getElementById('signupBtnText');
 const signupSpinner = document.getElementById('signupSpinner');
+const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+const loginBtnText = document.getElementById('loginBtnText');
+const loginSpinner = document.getElementById('loginSpinner');
+
+// New DOM Elements for User Profile
+const userProfileDropdown = document.getElementById('userProfileDropdown');
+const userInitials = document.getElementById('userInitials');
+const userImage = document.getElementById('userImage');
+const dropdownUserImage = document.getElementById('dropdownUserImage');
+const dropdownUserName = document.getElementById('dropdownUserName');
+const dropdownUserRole = document.getElementById('dropdownUserRole');
+const editProfileBtn = document.getElementById('editProfileBtn');
+const landHistoryBtn = document.getElementById('landHistoryBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const authButtons = document.getElementById('authButtons');
+const authButtons2 = document.getElementById('authButtons2');
+const mobileAuthButtons = document.getElementById('mobileAuthButtons');
+const mobileUserProfile = document.getElementById('mobileUserProfile');
+const mobileUserInitials = document.getElementById('mobileUserInitials');
+const mobileUserName = document.getElementById('mobileUserName');
+const mobileUserRole = document.getElementById('mobileUserRole');
+const mobileEditProfileBtn = document.getElementById('mobileEditProfileBtn');
+const mobileLandHistoryBtn = document.getElementById('mobileLandHistoryBtn');
+const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
 
 // State
 let currentTestimonialIndex = 0;
 let activeFilter = 'all';
+let currentUser = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
     renderLands();
     updateTestimonial();
     setupEventListeners();
+    checkAuthStatus();
 });
+
+// Check if user is logged in
+function checkAuthStatus() {
+    const token = localStorage.getItem('token');
+    if (token) {
+        fetchUserProfile(token);
+    }
+}
+
+// Fetch user profile
+async function fetchUserProfile(token) {
+    try {
+        const response = await fetch('http://72.61.169.226/user/details', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            currentUser = data;
+            showUserProfile(data.user);
+        } else {
+            // Token might be invalid, clear it
+            localStorage.removeItem('token');
+        }
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+    }
+}
+
+// Show user profile in UI
+function showUserProfile(user) {
+    // Hide auth buttons
+    if (authButtons) authButtons.style.display = 'none';
+    if (authButtons2) authButtons2.style.display = 'none';
+    if (mobileAuthButtons) mobileAuthButtons.style.display = 'none';
+    
+    // Show user profile
+    if (userProfileDropdown) userProfileDropdown.style.display = 'block';
+    if (mobileUserProfile) mobileUserProfile.style.display = 'block';
+    
+    // Set user initials
+    const initials = getInitials(user.name);
+    if (userInitials) userInitials.textContent = initials;
+    if (mobileUserInitials) mobileUserInitials.textContent = initials;
+    if (dropdownUserImage) dropdownUserImage.textContent = initials;
+    
+    // Set user name and role
+    if (dropdownUserName) dropdownUserName.textContent = user.name;
+    if (dropdownUserRole) dropdownUserRole.textContent = user.role;
+    if (mobileUserName) mobileUserName.textContent = user.name;
+    if (mobileUserRole) mobileUserRole.textContent = user.role;
+    
+    // If user has image, use it
+    if (user.image || user.photo) {
+        const imageUrl = user.image || user.photo;
+        if (userInitials) userInitials.style.display = 'none';
+        if (userImage) {
+            userImage.style.display = 'block';
+            userImage.innerHTML = `<img src="${imageUrl}" class="user-profile-image" alt="${user.name}">`;
+        }
+    }
+}
+
+// Helper function to get initials
+function getInitials(name) {
+    return name.split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
+}
 
 // Setup Event Listeners
 function setupEventListeners() {
     // Mobile Menu
-    mobileMenuBtn.addEventListener('click', () => mobileMenu.style.display = 'block');
-    closeMobileMenu.addEventListener('click', () => mobileMenu.style.display = 'none');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', () => {
+            if (mobileMenu) mobileMenu.style.display = 'block';
+        });
+    }
+
+    if (closeMobileMenu) {
+        closeMobileMenu.addEventListener('click', () => {
+            if (mobileMenu) mobileMenu.style.display = 'none';
+        });
+    }
     
     // Modal Controls
-    navSignUp.addEventListener('click', () => signupModal.style.display = 'flex');
-    navSignIn.addEventListener('click', () => loginModal.style.display = 'flex');
-    mobileSignUp.addEventListener('click', () => {
-        mobileMenu.style.display = 'none';
-        signupModal.style.display = 'flex';
-    });
-    mobileSignIn.addEventListener('click', () => {
-        mobileMenu.style.display = 'none';
-        loginModal.style.display = 'flex';
-    });
-    ctaSignUp.addEventListener('click', () => signupModal.style.display = 'flex');
+    if (navSignUp) navSignUp.addEventListener('click', () => signupModal.style.display = 'flex');
+    if (navSignIn) navSignIn.addEventListener('click', () => loginModal.style.display = 'flex');
+    
+    if (mobileSignUp) {
+        mobileSignUp.addEventListener('click', () => {
+            mobileMenu.style.display = 'none';
+            signupModal.style.display = 'flex';
+        });
+    }
+    
+    if (mobileSignIn) {
+        mobileSignIn.addEventListener('click', () => {
+            mobileMenu.style.display = 'none';
+            loginModal.style.display = 'flex';
+        });
+    }
+    
+    if (ctaSignUp) ctaSignUp.addEventListener('click', () => signupModal.style.display = 'flex');
     
     // Close Modals
-    closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
-    closeSignupModal.addEventListener('click', () => signupModal.style.display = 'none');
+    if (closeLoginModal) closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
+    if (closeSignupModal) closeSignupModal.addEventListener('click', () => signupModal.style.display = 'none');
     
     // Modal Transitions
-    openSignupFromLogin.addEventListener('click', (e) => {
-        e.preventDefault();
-        loginModal.style.display = 'none';
-        signupModal.style.display = 'flex';
-    });
+    if (openSignupFromLogin) {
+        openSignupFromLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginModal.style.display = 'none';
+            signupModal.style.display = 'flex';
+        });
+    }
     
-    openLoginFromSignup.addEventListener('click', (e) => {
-        e.preventDefault();
-        signupModal.style.display = 'none';
-        loginModal.style.display = 'flex';
-    });
+    if (openLoginFromSignup) {
+        openLoginFromSignup.addEventListener('click', (e) => {
+            e.preventDefault();
+            signupModal.style.display = 'none';
+            loginModal.style.display = 'flex';
+        });
+    }
     
     // Close modals when clicking outside
     [loginModal, signupModal].forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
     });
     
     // Forms
-    loginForm.addEventListener('submit', handleLogin);
-    signupForm.addEventListener('submit', handleSignup);
+    if (loginForm) loginForm.addEventListener('submit', handleLogin);
+    if (signupForm) signupForm.addEventListener('submit', handleSignup);
     
     // Testimonials
-    prevTestimonial.addEventListener('click', showPreviousTestimonial);
-    nextTestimonial.addEventListener('click', showNextTestimonial);
+    if (prevTestimonial) prevTestimonial.addEventListener('click', showPreviousTestimonial);
+    if (nextTestimonial) nextTestimonial.addEventListener('click', showNextTestimonial);
     
     testimonialDots.forEach((dot, index) => {
         dot.addEventListener('click', () => {
             currentTestimonialIndex = index;
             updateTestimonial();
-        });
-    });
-    
-    // Browse Lands buttons
-    document.querySelectorAll('.browse-lands').forEach(btn => {
-        btn.addEventListener('click', () => {
-            alert('Browse Lands functionality would navigate to lands listing page');
-            // In a real app: window.location.href = '/lands.html';
         });
     });
     
@@ -231,10 +346,25 @@ function setupEventListeners() {
             renderLands();
         });
     });
+    
+    // User Profile Actions
+    if (editProfileBtn) editProfileBtn.addEventListener('click', openEditProfileModal);
+    if (mobileEditProfileBtn) mobileEditProfileBtn.addEventListener('click', openEditProfileModal);
+    
+    if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+    if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', handleLogout);
+    
+    // Initialize Bootstrap dropdown
+    const userProfileBtn = document.getElementById('userProfileBtn');
+    if (userProfileBtn && bootstrap) {
+        new bootstrap.Dropdown(userProfileBtn);
+    }
 }
 
 // Render Lands
 function renderLands() {
+    if (!landsGrid) return;
+    
     landsGrid.innerHTML = '';
     
     const filteredLands = activeFilter === 'all' 
@@ -289,7 +419,7 @@ function renderLands() {
                             ${Array(Math.floor(land.rating)).fill('<i class="bi bi-star-fill text-warning"></i>').join('')}
                             <span class="ms-1 fw-semibold">${land.rating}</span>
                         </div>
-                        <button class="btn btn-success btn-sm">View Details</button>
+                        <button class="btn btn-success btn-sm" onclick="alert('View details for: ${land.title}')">View Details</button>
                     </div>
                 </div>
             </div>
@@ -300,6 +430,8 @@ function renderLands() {
 
 // Testimonial Functions
 function updateTestimonial() {
+    if (!testimonialText || !testimonialName || !testimonialRole) return;
+    
     const testimonial = testimonials[currentTestimonialIndex];
     testimonialText.textContent = `"${testimonial.text}"`;
     testimonialName.textContent = testimonial.name;
@@ -327,11 +459,24 @@ setInterval(showNextTestimonial, 5000);
 // Form Handlers
 async function handleLogin(e) {
     e.preventDefault();
+    
+    if (!loginSubmitBtn || !loginBtnText || !loginSpinner) return;
+    
     const identifier = document.getElementById('loginIdentifier').value;
     const password = document.getElementById('loginPassword').value;
     
+    if (!identifier || !password) {
+        showNotification('Please fill in all fields', 'error');
+        return;
+    }
+    
+    // Show loading state
+    loginBtnText.textContent = 'Signing in...';
+    loginSpinner.classList.remove('d-none');
+    loginSubmitBtn.disabled = true;
+    
     try {
-        const response = await fetch('/api/proxy?url=http://72.61.169.226/auth/login-user', {
+        const response = await fetch('http://72.61.169.226/auth/login-user', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -341,22 +486,34 @@ async function handleLogin(e) {
         
         const data = await response.json();
         
-        if (response.ok) {
+        if (response.ok && data.token) {
             localStorage.setItem('token', data.token);
             loginModal.style.display = 'none';
-            alert('Login successful! Redirecting to dashboard...');
-            // In a real app: window.location.href = '/dashboard.html';
+            loginForm.reset();
+            
+            // Fetch and display user profile
+            await fetchUserProfile(data.token);
+            
+            // Show success message
+            showNotification('Login successful!', 'success');
         } else {
-            alert(`Error: ${data.error}`);
+            showNotification(data.error || 'Login failed. Please check your credentials.', 'error');
         }
     } catch (err) {
         console.error('Network error:', err);
-        alert('Network error');
+        showNotification('Network error. Please try again.', 'error');
+    } finally {
+        // Reset button state
+        loginBtnText.textContent = 'Sign In';
+        loginSpinner.classList.add('d-none');
+        loginSubmitBtn.disabled = false;
     }
 }
 
 async function handleSignup(e) {
     e.preventDefault();
+    
+    if (!signupSubmitBtn || !signupBtnText || !signupSpinner) return;
     
     const name = document.getElementById('signupName').value;
     const email = document.getElementById('signupEmail').value;
@@ -364,8 +521,13 @@ async function handleSignup(e) {
     const password = document.getElementById('signupPassword').value;
     const agreeTerms = document.getElementById('agreeTerms').checked;
     
+    if (!name || !email || !phone || !password) {
+        showNotification('Please fill in all fields', 'error');
+        return;
+    }
+    
     if (!agreeTerms) {
-        alert('Please agree to the Terms & Conditions');
+        showNotification('Please agree to the Terms & Conditions', 'error');
         return;
     }
     
@@ -375,11 +537,10 @@ async function handleSignup(e) {
     signupSubmitBtn.disabled = true;
     
     try {
-        const response = await fetch('http://72.61.169.226/api/create-user', {
+        const response = await fetch('http://72.61.169.226/user/create-user', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
             },
             body: JSON.stringify({ 
                 name, 
@@ -393,16 +554,16 @@ async function handleSignup(e) {
         const data = await response.json();
         
         if (response.ok) {
-            alert('Registration successful!');
+            showNotification('Registration successful! Please sign in.', 'success');
             signupModal.style.display = 'none';
-            loginModal.style.display = 'flex';
             signupForm.reset();
+            loginModal.style.display = 'flex';
         } else {
-            alert(`Error: ${data.error || 'Registration failed'}`);
+            showNotification(data.error || 'Registration failed. Please try again.', 'error');
         }
     } catch (err) {
         console.error('Network error:', err);
-        alert('Network error. Please try again.');
+        showNotification('Network error. Please try again.', 'error');
     } finally {
         // Reset button state
         signupBtnText.textContent = 'CREATE ACCOUNT';
@@ -411,8 +572,235 @@ async function handleSignup(e) {
     }
 }
 
-// Initialize Bootstrap Tooltips (if needed)
-const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl);
-});
+// Handle logout
+function handleLogout() {
+    localStorage.removeItem('token');
+    currentUser = null;
+    
+    // Hide user profile
+    if (userProfileDropdown) userProfileDropdown.style.display = 'none';
+    if (mobileUserProfile) mobileUserProfile.style.display = 'none';
+    
+    // Show auth buttons
+    if (authButtons) authButtons.style.display = 'block';
+    if (authButtons2) authButtons2.style.display = 'block';
+    if (mobileAuthButtons) mobileAuthButtons.style.display = 'block';
+    
+    // Close mobile menu if open
+    if (mobileMenu) mobileMenu.style.display = 'none';
+    
+    showNotification('Logged out successfully', 'success');
+}
+
+// Open edit profile modal
+function openEditProfileModal() {
+    if (!currentUser) return;
+    
+    // Close mobile menu if open
+    if (mobileMenu) mobileMenu.style.display = 'none';
+    
+    // Create modal HTML
+    const modalHTML = `
+        <div class="modal-overlay" id="editProfileModalOverlay">
+            <div class="modal-container profile-modal">
+                <button class="modal-close-btn" id="closeEditProfileModal">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <div class="p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold">Edit Profile</h2>
+                        <p class="text-muted">Update your personal information</p>
+                    </div>
+                    
+                    <form id="editProfileForm">
+                        <div class="form-section">
+                            <h6>Personal Information</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="editName" value="${currentUser.user.name}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control readonly-input" value="${currentUser.user.email}" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="editPhone" value="${currentUser.user.phone}">
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h6>Address Information</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">State</label>
+                                    <input type="text" class="form-control" id="editState" value="${currentUser.address?.state || ''}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">District</label>
+                                    <input type="text" class="form-control" id="editDistrict" value="${currentUser.address?.district || ''}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Mandal</label>
+                                    <input type="text" class="form-control" id="editMandal" value="${currentUser.address?.mandal || ''}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Village</label>
+                                    <input type="text" class="form-control" id="editVillage" value="${currentUser.address?.village || ''}">
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Pincode</label>
+                                    <input type="text" class="form-control" id="editPincode" value="${currentUser.address?.pincode || ''}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-3 mt-4">
+                            <button type="button" class="btn btn-secondary flex-grow-1" id="cancelEditBtn">Cancel</button>
+                            <button type="submit" class="btn btn-success flex-grow-1" id="saveProfileBtn">
+                                <span>Save Changes</span>
+                                <div class="spinner-border spinner-border-sm text-light ms-2 d-none" id="profileSpinner" role="status"></div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Show modal
+    const modal = document.getElementById('editProfileModalOverlay');
+    modal.style.display = 'flex';
+    
+    // Setup modal event listeners
+    const closeBtn = document.getElementById('closeEditProfileModal');
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    const editForm = document.getElementById('editProfileForm');
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => modal.remove());
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => modal.remove());
+    }
+    
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+    
+    if (editForm) {
+        editForm.addEventListener('submit', handleEditProfile);
+    }
+}
+
+// Handle edit profile
+async function handleEditProfile(e) {
+    e.preventDefault();
+    
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    
+    const name = document.getElementById('editName').value;
+    const phone = document.getElementById('editPhone').value;
+    const state = document.getElementById('editState').value;
+    const district = document.getElementById('editDistrict').value;
+    const mandal = document.getElementById('editMandal').value;
+    const village = document.getElementById('editVillage').value;
+    const pincode = document.getElementById('editPincode').value;
+    
+    const saveBtn = document.getElementById('saveProfileBtn');
+    const spinner = document.getElementById('profileSpinner');
+    const btnText = saveBtn ? saveBtn.querySelector('span') : null;
+    
+    // Show loading
+    if (btnText) btnText.textContent = 'Saving...';
+    if (spinner) spinner.classList.remove('d-none');
+    if (saveBtn) saveBtn.disabled = true;
+    
+    try {
+        // Update user details
+        const response = await fetch('http://72.61.169.226/user/details', {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name,
+                phone,
+                address: {
+                    state,
+                    district,
+                    mandal,
+                    village,
+                    pincode
+                }
+            })
+        });
+        
+        if (response.ok) {
+            // Refresh user data
+            await fetchUserProfile(token);
+            showNotification('Profile updated successfully', 'success');
+            
+            // Close modal
+            const modal = document.getElementById('editProfileModalOverlay');
+            if (modal) modal.remove();
+        } else {
+            showNotification('Failed to update profile', 'error');
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        showNotification('Network error', 'error');
+    } finally {
+        // Reset button
+        if (btnText) btnText.textContent = 'Save Changes';
+        if (spinner) spinner.classList.add('d-none');
+        if (saveBtn) saveBtn.disabled = false;
+    }
+}
+
+// Notification function
+function showNotification(message, type) {
+    // Remove existing notification
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    // Create notification
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'} me-2"></i>
+            ${message}
+        </div>
+    `;
+    
+    // Add to body
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 300);
+    }, 3000);
+}
