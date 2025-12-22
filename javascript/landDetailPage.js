@@ -2,6 +2,9 @@ let currentLand = null;
 let images = [];
 let currentImageIndex = 0;
 let imageGalleryModal = null;
+let purchaseConfirmationModal = null;
+let successToast = null;
+let errorToast = null;
 
 // DOM Elements
 let elements = {};
@@ -52,6 +55,20 @@ function initializeElements() {
         modalPrevBtn: document.getElementById('modalPrevBtn'),
         modalNextBtn: document.getElementById('modalNextBtn'),
         modalImageContainer: document.getElementById('modalImageContainer'),
+        
+        // Purchase Modal Elements
+        purchaseModalImage: document.getElementById('purchaseModalImage'),
+        purchaseModalTitle: document.getElementById('purchaseModalTitle'),
+        purchaseModalLocation: document.getElementById('purchaseModalLocation'),
+        purchaseModalPrice: document.getElementById('purchaseModalPrice'),
+        landCodeInput: document.getElementById('landCodeInput'),
+        confirmPurchaseBtn: document.getElementById('confirmPurchaseBtn'),
+        confirmPurchaseText: document.getElementById('confirmPurchaseText'),
+        confirmPurchaseSpinner: document.getElementById('confirmPurchaseSpinner'),
+        
+        // Toast Elements
+        toastMessage: document.getElementById('toastMessage'),
+        errorToastMessage: document.getElementById('errorToastMessage'),
         
         // Tab Content Elements
         propertyDescription: document.getElementById('propertyDescription'),
@@ -110,10 +127,26 @@ function initializeElements() {
         mobileShareBtn: document.getElementById('mobileShareBtn')
     };
     
-    // Initialize modal
+    // Initialize modals
     const modalElement = document.getElementById('imageGalleryModal');
     if (modalElement) {
         imageGalleryModal = new bootstrap.Modal(modalElement);
+    }
+    
+    const purchaseModalElement = document.getElementById('purchaseConfirmationModal');
+    if (purchaseModalElement) {
+        purchaseConfirmationModal = new bootstrap.Modal(purchaseModalElement);
+    }
+    
+    // Initialize toasts
+    const successToastElement = document.getElementById('successToast');
+    if (successToastElement) {
+        successToast = new bootstrap.Toast(successToastElement, { delay: 5000 });
+    }
+    
+    const errorToastElement = document.getElementById('errorToast');
+    if (errorToastElement) {
+        errorToast = new bootstrap.Toast(errorToastElement, { delay: 5000 });
     }
 }
 
@@ -121,7 +154,7 @@ function initializeElements() {
 function proxyUrl(url) {
     if (!url) return "";
     if (url.startsWith("http://") || url.startsWith("https://")) {
-        return url; // Remove proxy for now to avoid CORS issues
+        return url;
     }
     return url;
 }
@@ -159,6 +192,205 @@ function formatLocation(location) {
     if (location.state && location.state !== 'null') parts.push(location.state);
     
     return parts.length > 0 ? parts.join(', ') : 'Location not specified';
+}
+
+// JWT Token Functions
+function getJwtToken() {
+    // Try to get token from various storage locations
+    return localStorage.getItem('token');
+}
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+function redirectToLogin() {
+    window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+}
+
+// Purchase Request Functions
+function openPurchaseConfirmation() {
+    if (!currentLand) {
+        showErrorToast('Land information not loaded');
+        return;
+    }
+    
+    // Check if user is logged in
+    const token = getJwtToken();
+    if (!token) {
+        showErrorToast('Please login to make a purchase request');
+        setTimeout(() => redirectToLogin(), 1500);
+        return;
+    }
+    
+    // Update modal content
+    if (elements.purchaseModalImage) {
+        elements.purchaseModalImage.src = images.length > 0 ? proxyUrl(images[0]) : 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=300';
+    }
+    
+    if (elements.purchaseModalTitle) {
+        elements.purchaseModalTitle.textContent = elements.desktopPropertyTitle.textContent || 
+                                                 elements.mobilePropertyTitle.textContent;
+    }
+    
+    if (elements.purchaseModalLocation) {
+        elements.purchaseModalLocation.textContent = elements.desktopPropertyLocation.textContent || 
+                                                    elements.mobilePropertyLocation.textContent;
+    }
+    
+    if (elements.purchaseModalPrice) {
+        elements.purchaseModalPrice.textContent = elements.desktopPropertyPrice.textContent || 
+                                                 elements.mobilePropertyPrice.textContent;
+    }
+    
+    // Reset land code input
+    if (elements.landCodeInput) {
+        elements.landCodeInput.value = '';
+    }
+    
+    // Reset button state
+    if (elements.confirmPurchaseBtn) {
+        elements.confirmPurchaseBtn.disabled = false;
+    }
+    if (elements.confirmPurchaseSpinner) {
+        elements.confirmPurchaseSpinner.classList.add('d-none');
+    }
+    if (elements.confirmPurchaseText) {
+        elements.confirmPurchaseText.textContent = 'Submit Purchase Request';
+    }
+    
+    // Show modal
+    if (purchaseConfirmationModal) {
+        purchaseConfirmationModal.show();
+    }
+}
+
+async function submitPurchaseRequest() {
+    if (!currentLand) {
+        showErrorToast('Land information not loaded');
+        return;
+    }
+    
+    const token = getJwtToken();
+    if (!token) {
+        showErrorToast('Session expired. Please login again.');
+        setTimeout(() => redirectToLogin(), 1500);
+        return;
+    }
+    
+    // Show loading state
+    if (elements.confirmPurchaseBtn) {
+        elements.confirmPurchaseBtn.disabled = true;
+    }
+    if (elements.confirmPurchaseSpinner) {
+        elements.confirmPurchaseSpinner.classList.remove('d-none');
+    }
+    if (elements.confirmPurchaseText) {
+        elements.confirmPurchaseText.textContent = 'Processing...';
+    }
+    
+    try {
+        // Prepare request data
+        const requestData = {
+            land_id: currentLand.land_id,
+            status: 'pending',
+            land_code: elements.landCodeInput ? elements.landCodeInput.value.trim() : ''
+        };
+        
+        // Send POST request
+        const response = await fetch('http://localhost:5000/user/land-purchase', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        // Reset button state
+        if (elements.confirmPurchaseBtn) {
+            elements.confirmPurchaseBtn.disabled = false;
+        }
+        if (elements.confirmPurchaseSpinner) {
+            elements.confirmPurchaseSpinner.classList.add('d-none');
+        }
+        if (elements.confirmPurchaseText) {
+            elements.confirmPurchaseText.textContent = 'Submit Purchase Request';
+        }
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Close modal
+            if (purchaseConfirmationModal) {
+                purchaseConfirmationModal.hide();
+            }
+            
+            // Show success message
+            showSuccessToast(data.message || '✅ Purchase request submitted successfully!');
+            
+            // Update UI
+            updateUIAfterPurchase();
+            
+        } else {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
+        
+    } catch (error) {
+        console.error('Error submitting purchase request:', error);
+        
+        // Reset button state
+        if (elements.confirmPurchaseBtn) {
+            elements.confirmPurchaseBtn.disabled = false;
+        }
+        if (elements.confirmPurchaseSpinner) {
+            elements.confirmPurchaseSpinner.classList.add('d-none');
+        }
+        if (elements.confirmPurchaseText) {
+            elements.confirmPurchaseText.textContent = 'Submit Purchase Request';
+        }
+        
+        showErrorToast(error.message || 'Failed to submit purchase request');
+    }
+}
+
+function updateUIAfterPurchase() {
+    // Update all buy buttons to show "Request Sent"
+    const buyButtons = [
+        elements.mobileQuickContactBtn,
+        elements.mobileContactBtn,
+        elements.desktopContactBtn,
+        elements.ownerContactBtn,
+        elements.mobileFloatingBtn
+    ];
+    
+    buyButtons.forEach(btn => {
+        if (btn) {
+            btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Request Sent';
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-secondary');
+            btn.disabled = true;
+            btn.onclick = null;
+        }
+    });
+}
+
+function showSuccessToast(message) {
+    if (elements.toastMessage && successToast) {
+        elements.toastMessage.textContent = message;
+        successToast.show();
+    }
+}
+
+function showErrorToast(message) {
+    if (elements.errorToastMessage && errorToast) {
+        elements.errorToastMessage.textContent = message;
+        errorToast.show();
+    }
 }
 
 // Image Gallery Functions
@@ -585,8 +817,8 @@ function initializeEventListeners() {
         });
     }
 
-    // Contact Buttons
-    const contactButtons = [
+    // Buy Land Request Buttons
+    const buyButtons = [
         elements.mobileQuickContactBtn,
         elements.mobileContactBtn,
         elements.desktopContactBtn,
@@ -594,18 +826,16 @@ function initializeEventListeners() {
         elements.mobileFloatingBtn
     ];
     
-    contactButtons.forEach(btn => {
+    buyButtons.forEach(btn => {
         if (btn) {
-            btn.addEventListener('click', () => {
-                const phone = currentLand?.farmer_details?.phone;
-                if (phone) {
-                    window.location.href = `tel:${phone}`;
-                } else {
-                    alert('Phone number not available');
-                }
-            });
+            btn.addEventListener('click', openPurchaseConfirmation);
         }
     });
+
+    // Confirm Purchase Button
+    if (elements.confirmPurchaseBtn) {
+        elements.confirmPurchaseBtn.addEventListener('click', submitPurchaseRequest);
+    }
 
     // View on Maps
     if (elements.viewOnMapsBtn) {

@@ -162,7 +162,12 @@ function updatePriceRangeDisplay() {
 async function fetchLands() {
     try {
         showLoading();
-        const response = await fetch('http://72.61.169.226/user/verified/land');
+        const response = await fetch('http://localhost:5000/user/land-purchase', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            }
+        });
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -441,7 +446,7 @@ window.viewLandDetails = function(landId) {
     try {
         // Store only the land ID in localStorage
         localStorage.setItem('landId', landId);
-        localStorage.removeItem('isPurchased');
+        localStorage.setItem('isPurchased', 'true');
         
         // Navigate to details page with the land_id
         window.location.href = `landDetailPage.html?id=${landId}`;

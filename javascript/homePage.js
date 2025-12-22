@@ -1,89 +1,6 @@
 // Sample Data
 const featuredLands = [
-    {
-        id: 1,
-        title: "50-Acre Agricultural Paradise",
-        price: "$750,000",
-        location: "Central Valley, California",
-        acres: 50,
-        waterSource: "Well & Stream",
-        soilType: "Fertile Loam",
-        zoning: "Agricultural",
-        image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
-        rating: 4.9,
-        featured: true,
-        type: "agricultural"
-    },
-    {
-        id: 2,
-        title: "Mountain View Development Land",
-        price: "$1,200,000",
-        location: "Rocky Mountains, Colorado",
-        acres: 25,
-        waterSource: "Municipal",
-        soilType: "Rocky",
-        zoning: "Residential/Commercial",
-        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
-        rating: 4.8,
-        featured: true,
-        type: "development"
-    },
-    {
-        id: 3,
-        title: "Riverfront Recreational Property",
-        price: "$450,000",
-        location: "Missouri River, Montana",
-        acres: 15,
-        waterSource: "River Frontage",
-        soilType: "Sandy Loam",
-        zoning: "Recreational",
-        image: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
-        rating: 4.7,
-        featured: true,
-        type: "recreational"
-    },
-    {
-        id: 4,
-        title: "Solar Farm Ready Land",
-        price: "$950,000",
-        location: "Mojave Desert, Nevada",
-        acres: 100,
-        waterSource: "Limited",
-        soilType: "Sandy",
-        zoning: "Energy/Industrial",
-        image: "https://images.unsplash.com/photo-1509316785289-025f5b846b35?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
-        rating: 4.6,
-        featured: false,
-        type: "industrial"
-    },
-    {
-        id: 5,
-        title: "Timber Investment Property",
-        price: "$650,000",
-        location: "Pacific Northwest, Oregon",
-        acres: 80,
-        waterSource: "Multiple Streams",
-        soilType: "Clay Loam",
-        zoning: "Forestry",
-        image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
-        rating: 4.9,
-        featured: true,
-        type: "timber"
-    },
-    {
-        id: 6,
-        title: "Lakeside Vacation Plot",
-        price: "$325,000",
-        location: "Lake Tahoe, California",
-        acres: 5,
-        waterSource: "Lake Access",
-        soilType: "Rocky/Sandy",
-        zoning: "Residential",
-        image: "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
-        rating: 4.8,
-        featured: false,
-        type: "residential"
-    },
+    // This will now be populated from API
 ];
 
 const testimonials = [
@@ -163,13 +80,15 @@ const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
 let currentTestimonialIndex = 0;
 let activeFilter = 'all';
 let currentUser = null;
+let lands = []; // Store API lands data
+let filteredLands = [];
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
-    renderLands();
-    updateTestimonial();
     setupEventListeners();
     checkAuthStatus();
+    fetchLands(); // Fetch lands from API instead of using static data
+    updateTestimonial();
 });
 
 // Check if user is logged in
@@ -202,6 +121,195 @@ async function fetchUserProfile(token) {
     } catch (error) {
         console.error('Error fetching user profile:', error);
     }
+}
+
+// Fetch lands from API
+async function fetchLands() {
+    try {
+        const response = await fetch('http://72.61.169.226/user/verified/land');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.message && data.data) {
+            lands = data.data.map((land, index) => {
+                const acres = parseInt(land.land_details.land_area) || 0;
+                
+                const getImage = () => {
+                    if (land.document_media?.land_photo?.length > 0) {
+                        return land.document_media.land_photo[0];
+                    }
+                    const defaultImages = {
+                        'agricultural': 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600',
+                        'residential': 'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600',
+                        'timber': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600',
+                        'industrial': 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?ixlib=rb-4.0.3&auto=format&fit=crop&w=600',
+                        'development': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600',
+                        'recreational': 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?ixlib=rb-4.0.3&auto=format&fit=crop&w=600'
+                    };
+                    return defaultImages[getLandType(land.land_details.land_type)] || defaultImages.agricultural;
+                };
+
+                const generateTitle = () => {
+                    const acresText = `${acres} Acre${acres !== 1 ? 's' : ''}`;
+                    const typeMap = {
+                        'agricultural': 'Agricultural Land',
+                        'residential': 'Residential Plot',
+                        'development': 'Development Land',
+                        'timber': 'Timber Land',
+                        'industrial': 'Industrial Property',
+                        'recreational': 'Recreational Property'
+                    };
+                    const typeText = typeMap[getLandType(land.land_details.land_type)] || 'Land Property';
+                    
+                    return `${acresText} ${typeText}`;
+                };
+
+                const formatLocation = () => {
+                    const loc = land.land_location;
+                    return `${loc.village}, ${loc.mandal}, ${loc.district}, ${loc.state}`;
+                };
+
+                return {
+                    id: land.land_id,
+                    title: generateTitle(),
+                    price: formatPrice(land.land_details.total_land_price),
+                    originalPrice: land.land_details.total_land_price,
+                    location: formatLocation(),
+                    acres: acres,
+                    waterSource: land.land_details.water_source || 'Not specified',
+                    soilType: 'Soil info available',
+                    zoning: getLandType(land.land_details.land_type).charAt(0).toUpperCase() + 
+                           getLandType(land.land_details.land_type).slice(1),
+                    image: getImage(),
+                    rating: 4.5 + (Math.random() * 0.5),
+                    featured: index < 3, // First 3 lands are featured
+                    type: getLandType(land.land_details.land_type),
+                    apiData: land
+                };
+            });
+            
+            // Set filteredLands to all lands initially
+            filteredLands = [...lands];
+            renderLands();
+        }
+    } catch (error) {
+        console.error('Error fetching lands:', error);
+        // Fallback to static data if API fails
+        lands = getFallbackLands();
+        filteredLands = [...lands];
+        renderLands();
+    }
+}
+
+// Helper functions from landPage.js
+function getLandType(type) {
+    const typeMap = {
+        'agri': 'agricultural',
+        'residential': 'residential',
+        'commercial': 'development',
+        'forest': 'timber',
+        'industrial': 'industrial',
+        'recreational': 'recreational'
+    };
+    return typeMap[type] || 'agricultural';
+}
+
+function formatPrice(price) {
+    return `₹${parseInt(price).toLocaleString('en-IN')}`;
+}
+
+// Fallback static data in case API fails
+function getFallbackLands() {
+    return [
+        {
+            id: 1,
+            title: "50-Acre Agricultural Paradise",
+            price: "₹750,000",
+            location: "Central Valley, California",
+            acres: 50,
+            waterSource: "Well & Stream",
+            soilType: "Fertile Loam",
+            zoning: "Agricultural",
+            image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
+            rating: 4.9,
+            featured: true,
+            type: "agricultural"
+        },
+        {
+            id: 2,
+            title: "Mountain View Development Land",
+            price: "₹1,200,000",
+            location: "Rocky Mountains, Colorado",
+            acres: 25,
+            waterSource: "Municipal",
+            soilType: "Rocky",
+            zoning: "Residential/Commercial",
+            image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
+            rating: 4.8,
+            featured: true,
+            type: "development"
+        },
+        {
+            id: 3,
+            title: "Riverfront Recreational Property",
+            price: "₹450,000",
+            location: "Missouri River, Montana",
+            acres: 15,
+            waterSource: "River Frontage",
+            soilType: "Sandy Loam",
+            zoning: "Recreational",
+            image: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
+            rating: 4.7,
+            featured: true,
+            type: "recreational"
+        },
+        {
+            id: 4,
+            title: "Solar Farm Ready Land",
+            price: "₹950,000",
+            location: "Mojave Desert, Nevada",
+            acres: 100,
+            waterSource: "Limited",
+            soilType: "Sandy",
+            zoning: "Energy/Industrial",
+            image: "https://images.unsplash.com/photo-1509316785289-025f5b846b35?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
+            rating: 4.6,
+            featured: false,
+            type: "industrial"
+        },
+        {
+            id: 5,
+            title: "Timber Investment Property",
+            price: "₹650,000",
+            location: "Pacific Northwest, Oregon",
+            acres: 80,
+            waterSource: "Multiple Streams",
+            soilType: "Clay Loam",
+            zoning: "Forestry",
+            image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
+            rating: 4.9,
+            featured: true,
+            type: "timber"
+        },
+        {
+            id: 6,
+            title: "Lakeside Vacation Plot",
+            price: "₹325,000",
+            location: "Lake Tahoe, California",
+            acres: 5,
+            waterSource: "Lake Access",
+            soilType: "Rocky/Sandy",
+            zoning: "Residential",
+            image: "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
+            rating: 4.8,
+            featured: false,
+            type: "residential"
+        },
+    ];
 }
 
 // Show user profile in UI
@@ -329,11 +437,11 @@ function setupEventListeners() {
         });
     });
     
-    // Filter buttons
-    document.querySelectorAll('.btn-outline-secondary').forEach(btn => {
+    // Filter buttons - Update to use API data
+    document.querySelectorAll('.btn-outline-secondary, .btn-success').forEach(btn => {
         btn.addEventListener('click', function() {
             // Update active state
-            document.querySelectorAll('.btn-outline-secondary').forEach(b => {
+            document.querySelectorAll('.btn-outline-secondary, .btn-success').forEach(b => {
                 b.classList.remove('btn-success');
                 b.classList.add('btn-outline-secondary');
             });
@@ -343,7 +451,7 @@ function setupEventListeners() {
             // Apply filter
             const filter = this.textContent.toLowerCase();
             activeFilter = filter === 'all' ? 'all' : filter;
-            renderLands();
+            filterLands();
         });
     });
     
@@ -354,11 +462,48 @@ function setupEventListeners() {
     if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
     if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', handleLogout);
     
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            filterLands(e.target.value.toLowerCase());
+        });
+    }
+    
+    // Find Land button
+    const findLandBtn = document.querySelector('a.btn-success[href="landPage.html"]');
+    if (findLandBtn) {
+        findLandBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const searchTerm = searchInput ? searchInput.value : '';
+            if (searchTerm) {
+                localStorage.setItem('searchTerm', searchTerm);
+            }
+            window.location.href = 'landPage.html';
+        });
+    }
+    
     // Initialize Bootstrap dropdown
     const userProfileBtn = document.getElementById('userProfileBtn');
     if (userProfileBtn && bootstrap) {
         new bootstrap.Dropdown(userProfileBtn);
     }
+}
+
+// Filter lands based on search and active filter
+function filterLands(searchTerm = '') {
+    filteredLands = lands.filter(land => {
+        const matchesSearch = !searchTerm || 
+            land.title.toLowerCase().includes(searchTerm) ||
+            land.location.toLowerCase().includes(searchTerm) ||
+            land.type.toLowerCase().includes(searchTerm);
+        
+        const matchesFilter = activeFilter === 'all' || land.type === activeFilter;
+        
+        return matchesSearch && matchesFilter;
+    });
+    
+    renderLands();
 }
 
 // Render Lands
@@ -367,23 +512,23 @@ function renderLands() {
     
     landsGrid.innerHTML = '';
     
-    const filteredLands = activeFilter === 'all' 
-        ? featuredLands 
-        : featuredLands.filter(land => land.type === activeFilter);
+    // Show only 6 lands on homepage
+    const landsToShow = filteredLands.slice(0, 6);
     
-    filteredLands.forEach(land => {
+    landsToShow.forEach(land => {
         const landCard = document.createElement('div');
         landCard.className = 'col-md-6 col-lg-4 mb-4';
         landCard.innerHTML = `
             <div class="land-card">
                 <div class="position-relative">
-                    <img src="${land.image}" class="land-card-img w-100" alt="${land.title}">
+                    <img src="${land.image}" class="land-card-img w-100" alt="${land.title}"
+                         onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600'">
                     ${land.featured ? '<span class="land-card-badge">Featured</span>' : ''}
                     <span class="land-card-price">${land.price}</span>
-                    <span class="land-card-acres">${land.acres} Acres</span>
+                    <span class="land-card-acres">${land.acres} Acre${land.acres !== 1 ? 's' : ''}</span>
                 </div>
                 <div class="p-4">
-                    <h5 class="fw-bold mb-2">${land.title}</h5>
+                    <h5 class="fw-bold mb-2 text-truncate-2">${land.title}</h5>
                     <div class="d-flex align-items-center text-muted mb-3">
                         <i class="bi bi-geo-alt me-2"></i>
                         <small class="text-truncate">${land.location}</small>
@@ -417,9 +562,11 @@ function renderLands() {
                     <div class="d-flex justify-content-between align-items-center border-top pt-3">
                         <div class="d-flex align-items-center">
                             ${Array(Math.floor(land.rating)).fill('<i class="bi bi-star-fill text-warning"></i>').join('')}
-                            <span class="ms-1 fw-semibold">${land.rating}</span>
+                            <span class="ms-1 fw-semibold">${land.rating.toFixed(1)}</span>
                         </div>
-                        <button class="btn btn-success btn-sm" onclick="alert('View details for: ${land.title}')">View Details</button>
+                        <button class="btn btn-success btn-sm" onclick="window.viewLandDetails('${land.id}')">
+                            View Details
+                        </button>
                     </div>
                 </div>
             </div>
@@ -427,6 +574,21 @@ function renderLands() {
         landsGrid.appendChild(landCard);
     });
 }
+
+// Global function to handle view details - similar to landPage.js
+window.viewLandDetails = function(landId) {
+    try {
+        // Store only the land ID in localStorage
+        localStorage.setItem('landId', landId);
+        
+        // Navigate to details page with the land_id
+        window.location.href = `landDetailPage.html?id=${landId}`;
+    } catch (error) {
+        console.error('Error storing land data:', error);
+        // Fallback: navigate with ID only
+        window.location.href = `landDetailPage.html?id=${landId}`;
+    }
+};
 
 // Testimonial Functions
 function updateTestimonial() {
