@@ -326,6 +326,7 @@ function getFallbackLands() {
 }
 
 // Show user profile in UI
+// Show user profile in UI
 function showUserProfile(user) {
     // Hide auth buttons
     if (authButtons) authButtons.style.display = 'none';
@@ -338,23 +339,68 @@ function showUserProfile(user) {
     
     // Set user initials
     const initials = getInitials(user.name);
-    if (userInitials) userInitials.textContent = initials;
-    if (mobileUserInitials) mobileUserInitials.textContent = initials;
-    if (dropdownUserImage) dropdownUserImage.textContent = initials;
+    
+    // Always show initials (they'll be hidden if image loads successfully)
+    if (userInitials) {
+        userInitials.textContent = initials;
+        userInitials.style.display = 'flex';
+    }
+    if (mobileUserInitials) {
+        mobileUserInitials.textContent = initials;
+        mobileUserInitials.style.display = 'flex';
+    }
+    if (dropdownUserImage) {
+        dropdownUserImage.textContent = initials;
+        dropdownUserImage.style.display = 'flex';
+    }
     
     // Set user name and role
     if (dropdownUserName) dropdownUserName.textContent = user.name;
-    if (dropdownUserRole) dropdownUserRole.textContent = user.role;
+    if (dropdownUserRole) dropdownUserRole.textContent = user.role || 'User';
     if (mobileUserName) mobileUserName.textContent = user.name;
-    if (mobileUserRole) mobileUserRole.textContent = user.role;
+    if (mobileUserRole) mobileUserRole.textContent = user.role || 'User';
     
-    // If user has image, use it
+    // Check if user has image
     if (user.image || user.photo) {
-        const imageUrl = user.image || user.photo;
-        if (userInitials) userInitials.style.display = 'none';
-        if (userImage) {
-            userImage.style.display = 'block';
-            userImage.innerHTML = `<img src="${imageUrl}" class="user-profile-image" alt="${user.name}">`;
+        const imageUrl = proxyUrl(user.image || user.photo);
+        
+        // Try to load the user's image
+        const img = new Image();
+        img.onload = () => {
+            // Image loaded successfully - replace initials with image
+            if (userInitials) userInitials.style.display = 'none';
+            if (userImage) {
+                userImage.style.display = 'block';
+                userImage.innerHTML = `<img src="${imageUrl}" class="user-profile-image" alt="${user.name}" onerror="handleProfileImageError(this, '${initials}')">`;
+            }
+            
+            // Also update mobile and dropdown images if they exist
+            const profileImages = document.querySelectorAll('.user-profile-image');
+            profileImages.forEach(imgElement => {
+                imgElement.src = imageUrl;
+            });
+        };
+        
+        img.onerror = () => {
+            // Image failed to load, keep showing initials
+            console.warn('Failed to load profile image, showing initials instead');
+        };
+        
+        img.src = imageUrl;
+    }
+}
+
+// Helper function to handle profile image errors
+function handleProfileImageError(imgElement, initials) {
+    console.warn('Profile image failed to load:', imgElement.src);
+    // You could hide the image and show initials instead
+    imgElement.style.display = 'none';
+    const parent = imgElement.parentElement;
+    if (parent) {
+        const initialsElement = parent.querySelector('.user-initials-circle');
+        if (initialsElement) {
+            initialsElement.style.display = 'flex';
+            initialsElement.textContent = initials;
         }
     }
 }
