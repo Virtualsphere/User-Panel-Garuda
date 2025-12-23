@@ -4,6 +4,7 @@ let filteredLands = [];
 let currentSearchQuery = "";
 let currentSelectedType = "all";
 let currentPriceRange = [0, 1000000000];
+const base_url= '/api/proxy?url=http://72.61.169.226';
 
 // DOM Elements
 const elements = {
@@ -162,7 +163,7 @@ function updatePriceRangeDisplay() {
 async function fetchLands() {
     try {
         showLoading();
-        const response = await fetch('http://72.61.169.226/user/land-purchase', {
+        const response = await fetch(`${base_url}/user/land-purchase`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json'
@@ -181,7 +182,7 @@ async function fetchLands() {
                 
                 const getImage = () => {
                     if (land.document_media?.land_photo?.length > 0) {
-                        return land.document_media.land_photo[0];
+                        return proxyUrl(land.document_media.land_photo[0]);
                     }
                     const defaultImages = {
                         'agricultural': 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600',

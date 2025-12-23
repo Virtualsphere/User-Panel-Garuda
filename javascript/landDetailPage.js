@@ -6,10 +6,95 @@ let purchaseConfirmationModal = null;
 let successToast = null;
 let errorToast = null;
 
+const base_url = 'http://72.61.169.226';
+
 // DOM Elements
 let elements = {};
 
-// Initialize DOM Elements after page loads
+// Enhanced Proxy Function
+function proxyUrl(url) {
+    if (!url || url === 'null' || url === 'undefined') return "";
+    
+    // If URL is already a complete URL
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+        // For backend URLs, use proxy
+        if (url.includes('72.61.169.226')) {
+            // Check if we're in development or production
+            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            if (isLocalhost) {
+                return `/api/proxy?url=${encodeURIComponent(url)}`;
+            } else {
+                // For Vercel deployment, use absolute path
+                return `/api/proxy?url=${encodeURIComponent(url)}`;
+            }
+        }
+        // For external URLs (Unsplash, etc.), use directly
+        return url;
+    }
+    
+    // If URL is relative or incomplete
+    if (url.startsWith('/')) {
+        const fullUrl = `${base_url}${url}`;
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        if (isLocalhost) {
+            return `/api/proxy?url=${encodeURIComponent(fullUrl)}`;
+        } else {
+            return `/api/proxy?url=${encodeURIComponent(fullUrl)}`;
+        }
+    }
+    
+    // Default - assume it's a relative path from backend
+    const fullUrl = `${base_url}/${url}`;
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocalhost) {
+        return `/api/proxy?url=${encodeURIComponent(fullUrl)}`;
+    } else {
+        return `/api/proxy?url=${encodeURIComponent(fullUrl)}`;
+    }
+}
+
+// Safe URL function for links that might open in new tab
+function safeUrl(url) {
+    if (!url || url === 'null' || url === 'undefined') return "#";
+    return proxyUrl(url);
+}
+
+function formatPrice(price) {
+    if (!price) return '₹0';
+    return `₹${parseInt(price).toLocaleString('en-IN')}`;
+}
+
+function getLandTypeLabel(type) {
+    if (!type) return 'Land Property';
+    
+    const typeMap = {
+        'agri': 'Agricultural Land',
+        'agricultural': 'Agricultural Land',
+        'agricultrue': 'Agricultural Land',
+        'residential': 'Residential Plot',
+        'commercial': 'Commercial Property',
+        'forest': 'Forest/Timber Land',
+        'industrial': 'Industrial Property',
+        'recreational': 'Recreational Property',
+        'timber': 'Timber Land',
+        'development': 'Development Land'
+    };
+    return typeMap[type.toLowerCase()] || 'Land Property';
+}
+
+function formatLocation(location) {
+    if (!location) return 'Location not specified';
+    
+    const parts = [];
+    if (location.village && location.village !== 'null') parts.push(location.village);
+    if (location.mandal && location.mandal !== 'null') parts.push(location.mandal);
+    if (location.district && location.district !== 'null') parts.push(location.district);
+    if (location.state && location.state !== 'null') parts.push(location.state);
+    
+    return parts.length > 0 ? parts.join(', ') : 'Location not specified';
+}
+
+// Initialize DOM Elements
 function initializeElements() {
     elements = {
         // Mobile Menu
@@ -150,53 +235,8 @@ function initializeElements() {
     }
 }
 
-// Utility Functions
-function proxyUrl(url) {
-    if (!url) return "";
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-        return url;
-    }
-    return url;
-}
-
-function formatPrice(price) {
-    if (!price) return '₹0';
-    return `₹${price.toLocaleString('en-IN')}`;
-}
-
-function getLandTypeLabel(type) {
-    if (!type) return 'Land Property';
-    
-    const typeMap = {
-        'agri': 'Agricultural Land',
-        'agricultural': 'Agricultural Land',
-        'agricultrue': 'Agricultural Land',
-        'residential': 'Residential Plot',
-        'commercial': 'Commercial Property',
-        'forest': 'Forest/Timber Land',
-        'industrial': 'Industrial Property',
-        'recreational': 'Recreational Property',
-        'timber': 'Timber Land',
-        'development': 'Development Land'
-    };
-    return typeMap[type.toLowerCase()] || 'Land Property';
-}
-
-function formatLocation(location) {
-    if (!location) return 'Location not specified';
-    
-    const parts = [];
-    if (location.village && location.village !== 'null') parts.push(location.village);
-    if (location.mandal && location.mandal !== 'null') parts.push(location.mandal);
-    if (location.district && location.district !== 'null') parts.push(location.district);
-    if (location.state && location.state !== 'null') parts.push(location.state);
-    
-    return parts.length > 0 ? parts.join(', ') : 'Location not specified';
-}
-
 // JWT Token Functions
 function getJwtToken() {
-    // Try to get token from various storage locations
     return localStorage.getItem('token');
 }
 
@@ -204,106 +244,370 @@ function redirectToLogin() {
     window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
 }
 
-// Purchase Status Check Functions
-function checkIfLandPurchased() {
-    const isPurchased = localStorage.getItem('isPurchased') === 'true';
+// Image Gallery Functions
+function updateMainImage() {
+    if (!elements.mainImage) return;
     
-    if (isPurchased) {
-        // Hide all buy buttons
-        const buyButtons = [
-            elements.mobileQuickContactBtn,
-            elements.mobileContactBtn,
-            elements.desktopContactBtn,
-            elements.ownerContactBtn,
-            elements.mobileFloatingBtn
-        ];
-        
-        buyButtons.forEach(btn => {
-            if (btn) {
-                btn.style.display = 'none';
-            }
-        });
-        
-        // Optionally show a message or alternative button
-        showPurchasedStatusMessage();
+    if (images.length > 0 && currentImageIndex < images.length) {
+        const imageUrl = images[currentImageIndex];
+        elements.mainImage.src = imageUrl;
+        elements.mainImage.onerror = function() {
+            console.error('Failed to load image:', imageUrl);
+            this.src = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200';
+        };
+    } else {
+        elements.mainImage.src = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200';
     }
     
-    // Clear the flag after checking
-    localStorage.removeItem('isPurchased');
-}
-
-function showPurchasedStatusMessage() {
-    // You can add a message or change the button text
-    const ownerInfoSection = document.querySelector('.bg-white.rounded-3.shadow-sm.p-4.mb-4');
-    if (ownerInfoSection && elements.ownerContactBtn) {
-        // Replace the buy button with a status message
-        elements.ownerContactBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Already Purchased';
-        elements.ownerContactBtn.classList.remove('btn-success');
-        elements.ownerContactBtn.classList.add('btn-secondary');
-        elements.ownerContactBtn.disabled = true;
+    if (elements.currentImageIndexSpan) {
+        elements.currentImageIndexSpan.textContent = images.length > 0 ? currentImageIndex + 1 : '0';
     }
+    
+    updateThumbnailSelection();
 }
 
-async function checkUserPurchaseStatus() {
-    const token = getJwtToken();
-    if (!token || !currentLand) return;
+function updateThumbnailSelection() {
+    const thumbnails = document.querySelectorAll('.thumbnail-item');
+    thumbnails.forEach((thumb, index) => {
+        thumb.classList.toggle('active', index === currentImageIndex);
+    });
+}
+
+function createThumbnails() {
+    if (!elements.thumbnailsRow) return;
+    
+    elements.thumbnailsRow.innerHTML = '';
+    
+    if (images.length === 0) {
+        elements.thumbnailsRow.innerHTML = `
+            <div class="col-12 text-center py-3 text-muted">
+                No images available
+            </div>
+        `;
+        return;
+    }
+    
+    // Show up to 4 thumbnails
+    const thumbnailsToShow = images.slice(0, 4);
+    
+    thumbnailsToShow.forEach((image, index) => {
+        const col = document.createElement('div');
+        col.className = 'col-3';
+        
+        const thumbnail = document.createElement('div');
+        thumbnail.className = `thumbnail-item ${index === currentImageIndex ? 'active' : ''}`;
+        thumbnail.onclick = () => {
+            currentImageIndex = index;
+            updateMainImage();
+        };
+        
+        const img = document.createElement('img');
+        img.src = image;
+        img.alt = `Thumbnail ${index + 1}`;
+        img.className = 'w-100 h-100 object-fit-cover';
+        img.style.height = '80px';
+        img.onerror = function() {
+            console.error('Failed to load thumbnail:', image);
+            this.src = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=300';
+        };
+        
+        thumbnail.appendChild(img);
+        col.appendChild(thumbnail);
+        elements.thumbnailsRow.appendChild(col);
+    });
+}
+
+function nextImage() {
+    if (images.length === 0) return;
+    currentImageIndex = (currentImageIndex + 1) % images.length;
+    updateMainImage();
+}
+
+function prevImage() {
+    if (images.length === 0) return;
+    currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+    updateMainImage();
+}
+
+function openImageGallery() {
+    if (images.length === 0 || !imageGalleryModal) return;
+    
+    if (elements.modalImage && images[currentImageIndex]) {
+        elements.modalImage.src = images[currentImageIndex];
+        elements.modalImage.onerror = function() {
+            console.error('Failed to load modal image:', images[currentImageIndex]);
+            this.src = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200';
+        };
+    }
+    
+    if (elements.modalImageIndex) {
+        elements.modalImageIndex.textContent = currentImageIndex + 1;
+    }
+    
+    if (elements.modalTotalImages) {
+        elements.modalTotalImages.textContent = images.length;
+    }
+    
+    imageGalleryModal.show();
+}
+
+// Data Loading Functions
+async function loadLandData() {
+    showLoading();
     
     try {
-        // Fetch user's purchase requests
-        const response = await fetch('http://72.61.169.226/user/land-purchase', {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
+        // Get land_id from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const landId = urlParams.get('id');
         
-        if (response.ok) {
-            const data = await response.json();
-            if (data.message && data.data) {
-                // Check if current land is in the user's purchase requests
-                const hasPurchased = data.data.some(purchase => 
-                    purchase.land_id === currentLand.land_id
-                );
-                
-                if (hasPurchased) {
-                    hideBuyButtons();
-                    showPurchasedStatusMessage();
+        // Also check localStorage (for backward compatibility)
+        const storedLandId = localStorage.getItem('landId') || landId;
+        
+        if (!storedLandId) {
+            throw new Error('No land ID specified');
+        }
+        
+        console.log('Fetching land data for ID:', storedLandId);
+        
+        // Try single land endpoint first
+        let response = await fetch(`${base_url}/user/verified/land/${storedLandId}`);
+        
+        if (!response.ok) {
+            console.log('Single land endpoint failed, trying all lands endpoint');
+            // Fallback to fetching all and filtering
+            const allResponse = await fetch(`${base_url}/user/verified/land`);
+            
+            if (!allResponse.ok) {
+                throw new Error(`HTTP error! status: ${allResponse.status}`);
+            }
+            
+            const allData = await allResponse.json();
+            
+            if (allData.message && allData.data) {
+                // Find the specific land by ID from the full list
+                const landData = allData.data.find(l => l.land_id === storedLandId);
+                if (landData) {
+                    currentLand = landData;
+                    renderLandData();
+                } else {
+                    throw new Error('Land not found in API data');
                 }
+            } else {
+                throw new Error('Invalid API response format');
+            }
+        } else {
+            // Single land endpoint success
+            const data = await response.json();
+            
+            if (data.message && data.data) {
+                currentLand = data.data;
+                renderLandData();
+            } else {
+                throw new Error('Invalid API response format');
             }
         }
+        
+        // Clean up localStorage
+        localStorage.removeItem('landId');
+        localStorage.removeItem('currentLand');
+        
     } catch (error) {
-        console.error('Error checking purchase status:', error);
+        console.error('Error loading land data:', error);
+        showError(error.message);
     }
 }
 
-function hideBuyButtons() {
-    const buyButtons = [
-        elements.mobileQuickContactBtn,
-        elements.mobileContactBtn,
-        elements.desktopContactBtn,
-        elements.ownerContactBtn,
-        elements.mobileFloatingBtn
-    ];
+function renderLandData() {
+    if (!currentLand) return;
     
-    buyButtons.forEach(btn => {
-        if (btn) {
-            btn.style.display = 'none';
+    console.log('Rendering land data:', currentLand);
+    
+    // Get all media and apply proxy
+    const documentMedia = currentLand.document_media || {};
+    
+    // Set images with proxy
+    images = (documentMedia.land_photo || []).map(img => proxyUrl(img));
+    
+    if (elements.totalImagesSpan) {
+        elements.totalImagesSpan.textContent = images.length;
+    }
+    
+    // Get land details
+    const landDetails = currentLand.land_details || {};
+    const landLocation = currentLand.land_location || {};
+    const farmerDetails = currentLand.farmer_details || {};
+    const gpsTracking = currentLand.gps_tracking || {};
+    const disputeDetails = currentLand.dispute_details || {};
+    
+    // Update property header
+    const landType = getLandTypeLabel(landDetails.land_type);
+    const landArea = landDetails.land_area || '0 acres';
+    
+    if (elements.mobilePropertyTitle) {
+        elements.mobilePropertyTitle.textContent = `${landType} - ${landArea}`;
+    }
+    
+    if (elements.desktopPropertyTitle) {
+        elements.desktopPropertyTitle.textContent = `${landType} - ${landArea}`;
+    }
+    
+    if (elements.mobilePropertyLocation) {
+        elements.mobilePropertyLocation.textContent = formatLocation(landLocation);
+    }
+    
+    if (elements.desktopPropertyLocation) {
+        elements.desktopPropertyLocation.textContent = formatLocation(landLocation);
+    }
+    
+    if (elements.mobilePropertyPrice) {
+        elements.mobilePropertyPrice.textContent = formatPrice(landDetails.total_land_price);
+    }
+    
+    if (elements.desktopPropertyPrice) {
+        elements.desktopPropertyPrice.textContent = formatPrice(landDetails.total_land_price);
+    }
+    
+    const pricePerAcre = formatPrice(landDetails.price_per_acre) + ' per acre';
+    if (elements.mobilePropertyPricePerAcre) {
+        elements.mobilePropertyPricePerAcre.textContent = pricePerAcre;
+    }
+    
+    if (elements.desktopPropertyPricePerAcre) {
+        elements.desktopPropertyPricePerAcre.textContent = pricePerAcre;
+    }
+    
+    // Update property description
+    if (elements.propertyDescription) {
+        elements.propertyDescription.textContent = 
+            `This ${landArea.toLowerCase()} ${landType.toLowerCase()} is located in the prime area of ${landLocation?.village || 'the region'}, ${landLocation?.district || 'the district'}. 
+            The property features excellent connectivity and is suitable for various purposes.`;
+    }
+    
+    // Update property details
+    if (elements.landArea) elements.landArea.textContent = landArea;
+    if (elements.waterSource) elements.waterSource.textContent = landDetails.water_source || 'Not specified';
+    if (elements.garden) elements.garden.textContent = landDetails.garden || 'No';
+    if (elements.residential) elements.residential.textContent = landDetails.residental || 'No';
+    if (elements.fencing) elements.fencing.textContent = landDetails.fencing || 'Not available';
+    if (elements.farmPond) elements.farmPond.textContent = landDetails.farm_pond || 'No';
+    if (elements.shedDetails) elements.shedDetails.textContent = landDetails.shed_details || 'Not available';
+    if (elements.roadAccess) elements.roadAccess.textContent = gpsTracking.road_path || 'Not specified';
+    if (elements.roadAccessDetail) elements.roadAccessDetail.textContent = gpsTracking.road_path || 'Not specified';
+    
+    // Update document links with proxy
+    if (elements.passbookLink && landDetails.passbook_photo) {
+        elements.passbookLink.href = safeUrl(landDetails.passbook_photo);
+        elements.passbookLink.target = '_blank';
+        elements.passbookLink.style.display = 'block';
+    } else if (elements.passbookLink) {
+        elements.passbookLink.style.display = 'none';
+    }
+    
+    if (elements.borderMapLink && gpsTracking.land_border) {
+        elements.borderMapLink.href = safeUrl(gpsTracking.land_border);
+        elements.borderMapLink.target = '_blank';
+        elements.borderMapLink.style.display = 'block';
+    } else if (elements.borderMapLink) {
+        elements.borderMapLink.style.display = 'none';
+    }
+    
+    // Update photo and video counts
+    if (elements.photoCount) {
+        elements.photoCount.textContent = `${images.length} image${images.length !== 1 ? 's' : ''} available`;
+    }
+    
+    const videoUrls = documentMedia.land_video || [];
+    const videoCount = videoUrls.length;
+    if (elements.videoCount) {
+        elements.videoCount.textContent = `${videoCount} video${videoCount !== 1 ? 's' : ''} available`;
+    }
+    
+    // Show video section if videos exist
+    if (elements.videoSection && videoCount > 0 && elements.propertyVideo) {
+        elements.videoSection.classList.remove('d-none');
+        const videoUrl = proxyUrl(videoUrls[0]);
+        elements.propertyVideo.src = videoUrl;
+        elements.propertyVideo.poster = images[0] || '';
+        elements.propertyVideo.onerror = function() {
+            console.error('Failed to load video:', videoUrl);
+            elements.videoSection.classList.add('d-none');
+        };
+    } else if (elements.videoSection) {
+        elements.videoSection.classList.add('d-none');
+    }
+    
+    // Update location details
+    const lat = gpsTracking.latitude;
+    const lng = gpsTracking.longitude;
+    if (elements.gpsCoordinates) {
+        elements.gpsCoordinates.textContent = lat && lng ? `${lat}, ${lng}` : 'Not available';
+    }
+    
+    if (elements.pathToLand) {
+        elements.pathToLand.textContent = disputeDetails.path_to_land || 'Not specified';
+    }
+    
+    // Update owner information
+    if (elements.ownerName) elements.ownerName.textContent = farmerDetails.name || 'Not available';
+    if (elements.ownerPhone) elements.ownerPhone.textContent = farmerDetails.phone || 'Not available';
+    if (elements.ownerEducation) elements.ownerEducation.textContent = farmerDetails.literacy || 'Not specified';
+    if (elements.ownerAge) elements.ownerAge.textContent = farmerDetails.age_group || 'Not specified';
+    
+    // Update legal status
+    const disputeType = disputeDetails.dispute_type || 'Not specified';
+    if (elements.disputeType) {
+        elements.disputeType.textContent = disputeType;
+    }
+    
+    // Update dispute status styling based on type
+    if (elements.disputeStatus) {
+        if (disputeType.toLowerCase() === 'none' || disputeType.toLowerCase() === 'no') {
+            elements.disputeStatus.style.background = '#d1fae5';
+            elements.disputeStatus.style.borderColor = '#10b981';
+            if (elements.disputeType) {
+                elements.disputeType.style.color = '#059669';
+            }
+        } else {
+            elements.disputeStatus.style.background = '#fef3c7';
+            elements.disputeStatus.style.borderColor = '#f59e0b';
+            if (elements.disputeType) {
+                elements.disputeType.style.color = '#d97706';
+            }
         }
-    });
+    }
     
-    // Also hide the purchase confirmation modal trigger
-    const purchaseModalTriggers = [elements.mobileQuickContactBtn, elements.mobileContactBtn, 
-                                   elements.desktopContactBtn, elements.ownerContactBtn, 
-                                   elements.mobileFloatingBtn];
+    if (elements.landOwnership) elements.landOwnership.textContent = farmerDetails.land_ownership || 'Not specified';
+    if (elements.mortgageStatus) elements.mortgageStatus.textContent = farmerDetails.mortgage || 'Not specified';
     
-    purchaseModalTriggers.forEach(trigger => {
-        if (trigger) {
-            trigger.removeEventListener('click', openPurchaseConfirmation);
-        }
-    });
+    // Initialize image gallery
+    updateMainImage();
+    createThumbnails();
+    
+    // Show content
+    showContent();
 }
 
-// Purchase Request Functions
+// UI State Functions
+function showLoading() {
+    if (elements.loadingState) elements.loadingState.classList.remove('d-none');
+    if (elements.errorState) elements.errorState.classList.add('d-none');
+    if (elements.propertyContent) elements.propertyContent.classList.add('d-none');
+}
+
+function showError(message) {
+    if (elements.loadingState) elements.loadingState.classList.add('d-none');
+    if (elements.errorState) elements.errorState.classList.remove('d-none');
+    if (elements.propertyContent) elements.propertyContent.classList.add('d-none');
+    if (elements.errorMessage) elements.errorMessage.textContent = message;
+}
+
+function showContent() {
+    if (elements.loadingState) elements.loadingState.classList.add('d-none');
+    if (elements.errorState) elements.errorState.classList.add('d-none');
+    if (elements.propertyContent) elements.propertyContent.classList.remove('d-none');
+}
+
+// Purchase Functions
 function openPurchaseConfirmation() {
     if (!currentLand) {
         showErrorToast('Land information not loaded');
@@ -320,7 +624,7 @@ function openPurchaseConfirmation() {
     
     // Update modal content
     if (elements.purchaseModalImage) {
-        elements.purchaseModalImage.src = images.length > 0 ? proxyUrl(images[0]) : 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=300';
+        elements.purchaseModalImage.src = images.length > 0 ? images[0] : 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=300';
     }
     
     if (elements.purchaseModalTitle) {
@@ -393,7 +697,7 @@ async function submitPurchaseRequest() {
         };
         
         // Send POST request
-        const response = await fetch('http://72.61.169.226/user/land-purchase', {
+        const response = await fetch(`${base_url}/user/land-purchase`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -485,348 +789,6 @@ function showErrorToast(message) {
     }
 }
 
-// Image Gallery Functions
-function updateMainImage() {
-    if (!elements.mainImage) return;
-    
-    if (images.length > 0 && currentImageIndex < images.length) {
-        const imageUrl = proxyUrl(images[currentImageIndex]);
-        elements.mainImage.src = imageUrl;
-        elements.mainImage.onerror = function() {
-            this.src = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200';
-        };
-    } else {
-        elements.mainImage.src = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200';
-    }
-    
-    if (elements.currentImageIndexSpan) {
-        elements.currentImageIndexSpan.textContent = images.length > 0 ? currentImageIndex + 1 : '0';
-    }
-    
-    updateThumbnailSelection();
-}
-
-function updateThumbnailSelection() {
-    const thumbnails = document.querySelectorAll('.thumbnail-item');
-    thumbnails.forEach((thumb, index) => {
-        thumb.classList.toggle('active', index === currentImageIndex);
-    });
-}
-
-function createThumbnails() {
-    if (!elements.thumbnailsRow) return;
-    
-    elements.thumbnailsRow.innerHTML = '';
-    
-    if (images.length === 0) {
-        elements.thumbnailsRow.innerHTML = `
-            <div class="col-12 text-center py-3 text-muted">
-                No images available
-            </div>
-        `;
-        return;
-    }
-    
-    // Show up to 4 thumbnails
-    const thumbnailsToShow = images.slice(0, 4);
-    
-    thumbnailsToShow.forEach((image, index) => {
-        const col = document.createElement('div');
-        col.className = 'col-3';
-        
-        const thumbnail = document.createElement('div');
-        thumbnail.className = `thumbnail-item ${index === currentImageIndex ? 'active' : ''}`;
-        thumbnail.onclick = () => {
-            currentImageIndex = index;
-            updateMainImage();
-        };
-        
-        const img = document.createElement('img');
-        img.src = proxyUrl(image);
-        img.alt = `Thumbnail ${index + 1}`;
-        img.className = 'w-100 h-100 object-fit-cover';
-        img.style.height = '80px';
-        img.onerror = function() {
-            this.src = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=300';
-        };
-        
-        thumbnail.appendChild(img);
-        col.appendChild(thumbnail);
-        elements.thumbnailsRow.appendChild(col);
-    });
-}
-
-function nextImage() {
-    if (images.length === 0) return;
-    currentImageIndex = (currentImageIndex + 1) % images.length;
-    updateMainImage();
-}
-
-function prevImage() {
-    if (images.length === 0) return;
-    currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
-    updateMainImage();
-}
-
-function openImageGallery() {
-    if (images.length === 0 || !imageGalleryModal) return;
-    
-    if (elements.modalImage && images[currentImageIndex]) {
-        elements.modalImage.src = proxyUrl(images[currentImageIndex]);
-        elements.modalImage.onerror = function() {
-            this.src = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200';
-        };
-    }
-    
-    if (elements.modalImageIndex) {
-        elements.modalImageIndex.textContent = currentImageIndex + 1;
-    }
-    
-    if (elements.modalTotalImages) {
-        elements.modalTotalImages.textContent = images.length;
-    }
-    
-    imageGalleryModal.show();
-}
-
-// Data Loading Functions
-async function loadLandData() {
-    showLoading();
-    
-    try {
-        // Get land_id from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const landId = urlParams.get('id');
-        
-        // Also check localStorage (for backward compatibility)
-        const storedLandId = localStorage.getItem('landId') || landId;
-        
-        if (!storedLandId) {
-            throw new Error('No land ID specified');
-        }
-        
-        // Fetch single land data from API
-        const response = await fetch(`http://72.61.169.226/user/verified/land/${storedLandId}`);
-        
-        if (!response.ok) {
-            // If endpoint doesn't exist, fallback to fetching all and filtering
-            const allResponse = await fetch('http://72.61.169.226/user/verified/land');
-            
-            if (!allResponse.ok) {
-                throw new Error(`HTTP error! status: ${allResponse.status}`);
-            }
-            
-            const allData = await allResponse.json();
-            
-            if (allData.message && allData.data) {
-                // Find the specific land by ID from the full list
-                const landData = allData.data.find(l => l.land_id === storedLandId);
-                if (landData) {
-                    currentLand = landData;
-                    renderLandData();
-                } else {
-                    throw new Error('Land not found in API data');
-                }
-            } else {
-                throw new Error('Invalid API response format');
-            }
-        } else {
-            // If single land endpoint exists, use it
-            const data = await response.json();
-            
-            if (data.message && data.data) {
-                currentLand = data.data;
-                renderLandData();
-            } else {
-                throw new Error('Invalid API response format');
-            }
-        }
-        
-        // Clean up localStorage
-        localStorage.removeItem('landId');
-        localStorage.removeItem('currentLand');
-        
-    } catch (error) {
-        console.error('Error loading land data:', error);
-        showError(error.message);
-    }
-}
-
-function renderLandData() {
-    if (!currentLand) return;
-    
-    // Set images
-    images = currentLand.document_media?.land_photo || [];
-    if (elements.totalImagesSpan) {
-        elements.totalImagesSpan.textContent = images.length;
-    }
-    
-    // Get land details
-    const landDetails = currentLand.land_details || {};
-    const landLocation = currentLand.land_location || {};
-    const farmerDetails = currentLand.farmer_details || {};
-    const gpsTracking = currentLand.gps_tracking || {};
-    const disputeDetails = currentLand.dispute_details || {};
-    const documentMedia = currentLand.document_media || {};
-    
-    // Update property header
-    const landType = getLandTypeLabel(landDetails.land_type);
-    const landArea = landDetails.land_area || '0 acres';
-    
-    if (elements.mobilePropertyTitle) {
-        elements.mobilePropertyTitle.textContent = `${landType} - ${landArea}`;
-    }
-    
-    if (elements.desktopPropertyTitle) {
-        elements.desktopPropertyTitle.textContent = `${landType} - ${landArea}`;
-    }
-    
-    if (elements.mobilePropertyLocation) {
-        elements.mobilePropertyLocation.textContent = formatLocation(landLocation);
-    }
-    
-    if (elements.desktopPropertyLocation) {
-        elements.desktopPropertyLocation.textContent = formatLocation(landLocation);
-    }
-    
-    if (elements.mobilePropertyPrice) {
-        elements.mobilePropertyPrice.textContent = formatPrice(landDetails.total_land_price);
-    }
-    
-    if (elements.desktopPropertyPrice) {
-        elements.desktopPropertyPrice.textContent = formatPrice(landDetails.total_land_price);
-    }
-    
-    const pricePerAcre = formatPrice(landDetails.price_per_acre) + ' per acre';
-    if (elements.mobilePropertyPricePerAcre) {
-        elements.mobilePropertyPricePerAcre.textContent = pricePerAcre;
-    }
-    
-    if (elements.desktopPropertyPricePerAcre) {
-        elements.desktopPropertyPricePerAcre.textContent = pricePerAcre;
-    }
-    
-    // Update property description
-    if (elements.propertyDescription) {
-        elements.propertyDescription.textContent = 
-            `This ${landArea.toLowerCase()} ${landType.toLowerCase()} is located in the prime area of ${landLocation?.village || 'the region'}, ${landLocation?.district || 'the district'}. 
-            The property features excellent connectivity and is suitable for various purposes.`;
-    }
-    
-    // Update property details
-    if (elements.landArea) elements.landArea.textContent = landArea;
-    if (elements.waterSource) elements.waterSource.textContent = landDetails.water_source || 'Not specified';
-    if (elements.garden) elements.garden.textContent = landDetails.garden || 'No';
-    if (elements.residential) elements.residential.textContent = landDetails.residental || 'No';
-    if (elements.fencing) elements.fencing.textContent = landDetails.fencing || 'Not available';
-    if (elements.farmPond) elements.farmPond.textContent = landDetails.farm_pond || 'No';
-    if (elements.shedDetails) elements.shedDetails.textContent = landDetails.shed_details || 'Not available';
-    if (elements.roadAccess) elements.roadAccess.textContent = gpsTracking.road_path || 'Not specified';
-    if (elements.roadAccessDetail) elements.roadAccessDetail.textContent = gpsTracking.road_path || 'Not specified';
-    
-    // Update document links
-    if (elements.passbookLink && landDetails.passbook_photo) {
-        elements.passbookLink.href = proxyUrl(landDetails.passbook_photo);
-        elements.passbookLink.target = '_blank';
-    } else if (elements.passbookLink) {
-        elements.passbookLink.style.display = 'none';
-    }
-    
-    if (elements.borderMapLink && gpsTracking.land_border) {
-        elements.borderMapLink.href = proxyUrl(gpsTracking.land_border);
-        elements.borderMapLink.target = '_blank';
-    } else if (elements.borderMapLink) {
-        elements.borderMapLink.style.display = 'none';
-    }
-    
-    // Update photo and video counts
-    if (elements.photoCount) {
-        elements.photoCount.textContent = `${images.length} image${images.length !== 1 ? 's' : ''} available`;
-    }
-    
-    const videoCount = documentMedia.land_video?.length || 0;
-    if (elements.videoCount) {
-        elements.videoCount.textContent = `${videoCount} video${videoCount !== 1 ? 's' : ''} available`;
-    }
-    
-    // Show video section if videos exist
-    if (elements.videoSection && videoCount > 0 && elements.propertyVideo) {
-        elements.videoSection.classList.remove('d-none');
-        elements.propertyVideo.src = proxyUrl(documentMedia.land_video[0]);
-        elements.propertyVideo.poster = proxyUrl(images[0] || '');
-    }
-    
-    // Update location details
-    const lat = gpsTracking.latitude;
-    const lng = gpsTracking.longitude;
-    if (elements.gpsCoordinates) {
-        elements.gpsCoordinates.textContent = lat && lng ? `${lat}, ${lng}` : 'Not available';
-    }
-    
-    if (elements.pathToLand) {
-        elements.pathToLand.textContent = disputeDetails.path_to_land || 'Not specified';
-    }
-    
-    // Update owner information
-    if (elements.ownerName) elements.ownerName.textContent = farmerDetails.name || 'Not available';
-    if (elements.ownerPhone) elements.ownerPhone.textContent = farmerDetails.phone || 'Not available';
-    if (elements.ownerEducation) elements.ownerEducation.textContent = farmerDetails.literacy || 'Not specified';
-    if (elements.ownerAge) elements.ownerAge.textContent = farmerDetails.age_group || 'Not specified';
-    
-    // Update legal status
-    const disputeType = disputeDetails.dispute_type || 'Not specified';
-    if (elements.disputeType) {
-        elements.disputeType.textContent = disputeType;
-    }
-    
-    // Update dispute status styling based on type
-    if (elements.disputeStatus) {
-        if (disputeType.toLowerCase() === 'none' || disputeType.toLowerCase() === 'no') {
-            elements.disputeStatus.style.background = '#d1fae5';
-            elements.disputeStatus.style.borderColor = '#10b981';
-            if (elements.disputeType) {
-                elements.disputeType.style.color = '#059669';
-            }
-        } else {
-            elements.disputeStatus.style.background = '#fef3c7';
-            elements.disputeStatus.style.borderColor = '#f59e0b';
-            if (elements.disputeType) {
-                elements.disputeType.style.color = '#d97706';
-            }
-        }
-    }
-    
-    if (elements.landOwnership) elements.landOwnership.textContent = farmerDetails.land_ownership || 'Not specified';
-    if (elements.mortgageStatus) elements.mortgageStatus.textContent = farmerDetails.mortgage || 'Not specified';
-    
-    // Initialize image gallery
-    updateMainImage();
-    createThumbnails();
-    
-    // Show content
-    showContent();
-}
-
-// UI State Functions
-function showLoading() {
-    if (elements.loadingState) elements.loadingState.classList.remove('d-none');
-    if (elements.errorState) elements.errorState.classList.add('d-none');
-    if (elements.propertyContent) elements.propertyContent.classList.add('d-none');
-}
-
-function showError(message) {
-    if (elements.loadingState) elements.loadingState.classList.add('d-none');
-    if (elements.errorState) elements.errorState.classList.remove('d-none');
-    if (elements.propertyContent) elements.propertyContent.classList.add('d-none');
-    if (elements.errorMessage) elements.errorMessage.textContent = message;
-}
-
-function showContent() {
-    if (elements.loadingState) elements.loadingState.classList.add('d-none');
-    if (elements.errorState) elements.errorState.classList.add('d-none');
-    if (elements.propertyContent) elements.propertyContent.classList.remove('d-none');
-}
-
 // Event Handlers
 function initializeEventListeners() {
     // Mobile Menu
@@ -889,7 +851,7 @@ function initializeEventListeners() {
         elements.modalPrevBtn.addEventListener('click', () => {
             prevImage();
             if (elements.modalImage && images[currentImageIndex]) {
-                elements.modalImage.src = proxyUrl(images[currentImageIndex]);
+                elements.modalImage.src = images[currentImageIndex];
             }
             if (elements.modalImageIndex) {
                 elements.modalImageIndex.textContent = currentImageIndex + 1;
@@ -901,7 +863,7 @@ function initializeEventListeners() {
         elements.modalNextBtn.addEventListener('click', () => {
             nextImage();
             if (elements.modalImage && images[currentImageIndex]) {
-                elements.modalImage.src = proxyUrl(images[currentImageIndex]);
+                elements.modalImage.src = images[currentImageIndex];
             }
             if (elements.modalImageIndex) {
                 elements.modalImageIndex.textContent = currentImageIndex + 1;
@@ -1019,19 +981,11 @@ function shareProperty() {
     }
 }
 
-// Initialize function with purchase status check
+// Initialize function
 function initialize() {
     initializeElements();
     initializeEventListeners();
-    
-    // Check both local storage flag and API for purchase status
-    checkIfLandPurchased();
-    loadLandData().then(() => {
-        // After land data is loaded, check purchase status from API
-        if (currentLand) {
-            checkUserPurchaseStatus();
-        }
-    });
+    loadLandData();
 }
 
 // Update the DOMContentLoaded event listener

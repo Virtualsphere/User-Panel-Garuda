@@ -83,6 +83,8 @@ let currentUser = null;
 let lands = []; // Store API lands data
 let filteredLands = [];
 
+const base_url= '/api/proxy?url=http://72.61.169.226';
+
 // Initialize
 // In homePage.js, update the DOMContentLoaded event handler:
 
@@ -92,13 +94,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Only fetch lands if on home page or land page
     const currentPage = window.location.pathname;
-    if (currentPage.includes('../index.html') || 
+    if (currentPage.includes('index.html') || 
         currentPage.includes('landPage.html')) {
         fetchLands();
     }
     
     // Initialize testimonial only on home page
-    if (currentPage.includes('../index.html')) {
+    if (currentPage.includes('index.html')) {
         updateTestimonial();
     }
 });
@@ -114,7 +116,7 @@ function checkAuthStatus() {
 // Fetch user profile
 async function fetchUserProfile(token) {
     try {
-        const response = await fetch('http://72.61.169.226/user/details', {
+        const response = await fetch(`${base_url}/user/details`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -138,7 +140,7 @@ async function fetchUserProfile(token) {
 // Fetch lands from API
 async function fetchLands() {
     try {
-        const response = await fetch('http://72.61.169.226/user/verified/land');
+        const response = await fetch(`${base_url}/user/verified/land`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -152,7 +154,7 @@ async function fetchLands() {
                 
                 const getImage = () => {
                     if (land.document_media?.land_photo?.length > 0) {
-                        return land.document_media.land_photo[0];
+                        return proxyUrl(land.document_media.land_photo[0]);
                     }
                     const defaultImages = {
                         'agricultural': 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600',
@@ -635,7 +637,7 @@ async function handleLogin(e) {
     loginSubmitBtn.disabled = true;
     
     try {
-        const response = await fetch('http://72.61.169.226/auth/login-user', {
+        const response = await fetch(`${base_url}/auth/login-user`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -696,7 +698,7 @@ async function handleSignup(e) {
     signupSubmitBtn.disabled = true;
     
     try {
-        const response = await fetch('http://72.61.169.226/user/create-user', {
+        const response = await fetch(`${base_url}/user/create-user`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -886,7 +888,7 @@ async function handleEditProfile(e) {
     
     try {
         // Update user details
-        const response = await fetch('http://72.61.169.226/user/details', {
+        const response = await fetch(`${base_url}/user/details`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
