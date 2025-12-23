@@ -577,6 +577,7 @@ window.viewLandDetails = function(landId) {
     try {
         // Store only the land ID in localStorage
         localStorage.setItem('landId', landId);
+        localStorage.removeItem('isPurchased');
         
         // Navigate to details page with the land_id
         window.location.href = `landDetailPage.html?id=${landId}`;
