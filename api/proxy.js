@@ -8,14 +8,16 @@ export default async function handler(req, res) {
   try {
     const targetUrl = decodeURIComponent(url);
 
-    const headers = {};
+    const headers = {
+      "Content-Type": req.headers["content-type"] || "application/json",
+    };
 
-    // Forward auth headers if needed
+    // Forward auth header
     if (req.headers.authorization) {
       headers.authorization = req.headers.authorization;
     }
 
-    // Forward range header (video streaming)
+    // Forward range header (media streaming)
     if (req.headers.range) {
       headers.range = req.headers.range;
     }
@@ -23,12 +25,16 @@ export default async function handler(req, res) {
     const response = await fetch(targetUrl, {
       method: req.method,
       headers,
+      body:
+        req.method !== "GET" && req.method !== "HEAD"
+          ? JSON.stringify(req.body)
+          : undefined,
     });
 
     // Forward status
     res.status(response.status);
 
-    // Forward headers (CRITICAL for images/videos)
+    // Forward headers
     response.headers.forEach((value, key) => {
       res.setHeader(key, value);
     });
