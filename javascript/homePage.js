@@ -538,7 +538,7 @@ function setupEventListeners() {
             if (searchTerm) {
                 localStorage.setItem('searchTerm', searchTerm);
             }
-            window.location.href = 'landPage.html';
+            window.location.href = 'html/landPage.html';
         });
     }
     
