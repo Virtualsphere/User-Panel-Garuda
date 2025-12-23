@@ -92,13 +92,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Only fetch lands if on home page or land page
     const currentPage = window.location.pathname;
-    if (currentPage.includes('homePage.html') || currentPage.includes('index.html') || 
+    if (currentPage.includes('../index.html') || 
         currentPage.includes('landPage.html')) {
         fetchLands();
     }
     
     // Initialize testimonial only on home page
-    if (currentPage.includes('homePage.html') || currentPage.includes('index.html')) {
+    if (currentPage.includes('../index.html')) {
         updateTestimonial();
     }
 });
