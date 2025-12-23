@@ -13,44 +13,11 @@ let elements = {};
 
 // Enhanced Proxy Function
 function proxyUrl(url) {
-    if (!url || url === 'null' || url === 'undefined') return "";
-    
-    // If URL is already a complete URL
+    if (!url) return "";
     if (url.startsWith("http://") || url.startsWith("https://")) {
-        // For backend URLs, use proxy
-        if (url.includes('72.61.169.226')) {
-            // Check if we're in development or production
-            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            if (isLocalhost) {
-                return `/api/proxy?url=${encodeURIComponent(url)}`;
-            } else {
-                // For Vercel deployment, use absolute path
-                return `/api/proxy?url=${encodeURIComponent(url)}`;
-            }
-        }
-        // For external URLs (Unsplash, etc.), use directly
-        return url;
+        return `/api/proxy?url=${encodeURIComponent(url)}`;
     }
-    
-    // If URL is relative or incomplete
-    if (url.startsWith('/')) {
-        const fullUrl = `${base_url}${url}`;
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        if (isLocalhost) {
-            return `/api/proxy?url=${encodeURIComponent(fullUrl)}`;
-        } else {
-            return `/api/proxy?url=${encodeURIComponent(fullUrl)}`;
-        }
-    }
-    
-    // Default - assume it's a relative path from backend
-    const fullUrl = `${base_url}/${url}`;
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isLocalhost) {
-        return `/api/proxy?url=${encodeURIComponent(fullUrl)}`;
-    } else {
-        return `/api/proxy?url=${encodeURIComponent(fullUrl)}`;
-    }
+    return url;
 }
 
 // Safe URL function for links that might open in new tab

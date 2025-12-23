@@ -127,6 +127,14 @@ async function fetchUserProfile(token) {
     }
 }
 
+function proxyUrl(url) {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+        return `/api/proxy?url=${encodeURIComponent(url)}`;
+    }
+    return url;
+}
+
 // Fetch lands from API
 async function fetchLands() {
     try {
