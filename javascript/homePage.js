@@ -91,18 +91,8 @@ const base_url= '/api/proxy?url=http://72.61.169.226';
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     checkAuthStatus();
-    
-    // Only fetch lands if on home page or land page
-    const currentPage = window.location.pathname;
-    if (currentPage.includes('index.html') || 
-        currentPage.includes('landPage.html')) {
-        fetchLands();
-    }
-    
-    // Initialize testimonial only on home page
-    if (currentPage.includes('index.html')) {
-        updateTestimonial();
-    }
+    fetchLands();
+    updateTestimonial();
 });
 
 // Check if user is logged in
