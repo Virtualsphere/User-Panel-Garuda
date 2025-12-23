@@ -580,11 +580,11 @@ window.viewLandDetails = function(landId) {
         localStorage.removeItem('isPurchased');
         
         // Navigate to details page with the land_id
-        window.location.href = `landDetailPage.html?id=${landId}`;
+        window.location.href = `html/landDetailPage.html?id=${landId}`;
     } catch (error) {
         console.error('Error storing land data:', error);
         // Fallback: navigate with ID only
-        window.location.href = `landDetailPage.html?id=${landId}`;
+        window.location.href = `html/landDetailPage.html?id=${landId}`;
     }
 };
 
