@@ -424,3 +424,63 @@ body {
     width: 1rem;
     height: 1rem;
 }
+
+/* About Page Specific Styles */
+.team-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.team-card:hover {
+    transform: translateY(-5px);
+}
+
+.mission-item {
+    padding: 1rem;
+    background: white;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+}
+
+/* Contact Page Specific Styles */
+.accordion-button {
+    font-weight: 600;
+    color: #374151;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #f0fdf4;
+    color: #065f46;
+    box-shadow: none;
+}
+
+.accordion-button:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25);
+}
+
+/* Active Navigation Item */
+.nav-link.active {
+    color: #10b981 !important;
+    font-weight: 600;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .team-image img {
+        width: 120px !important;
+        height: 120px !important;
+    }
+    
+    .office-card {
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Animation for accordion */
+.accordion-collapse {
+    transition: all 0.3s ease;
+}

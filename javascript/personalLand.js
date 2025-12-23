@@ -162,7 +162,7 @@ function updatePriceRangeDisplay() {
 async function fetchLands() {
     try {
         showLoading();
-        const response = await fetch('http://localhost:5000/user/land-purchase', {
+        const response = await fetch('http://72.61.169.226/user/land-purchase', {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json'

@@ -181,10 +181,11 @@ async function fetchLands() {
                     location: formatLocation(),
                     acres: acres,
                     waterSource: land.land_details.water_source || 'Not specified',
-                    soilType: 'Soil info available',
+                    type: land.land_details.land_type,
                     zoning: getLandType(land.land_details.land_type).charAt(0).toUpperCase() + 
                            getLandType(land.land_details.land_type).slice(1),
                     image: getImage(),
+                    verified: land.land_location.verification,
                     rating: 4.5 + (Math.random() * 0.5),
                     featured: index < 3, // First 3 lands are featured
                     type: getLandType(land.land_details.land_type),
@@ -542,28 +543,12 @@ function renderLands() {
                         </div>
                         <div class="col-6">
                             <small class="d-flex align-items-center">
-                                <i class="bi bi-mountain text-success me-1"></i>
-                                ${land.soilType}
-                            </small>
-                        </div>
-                        <div class="col-6">
-                            <small class="d-flex align-items-center">
-                                <i class="bi bi-building text-secondary me-1"></i>
-                                ${land.zoning}
-                            </small>
-                        </div>
-                        <div class="col-6">
-                            <small class="d-flex align-items-center">
                                 <i class="bi bi-ruler text-success me-1"></i>
-                                Surveyed
+                                ${land.verified}
                             </small>
                         </div>
                     </div>
                     <div class="d-flex justify-content-between align-items-center border-top pt-3">
-                        <div class="d-flex align-items-center">
-                            ${Array(Math.floor(land.rating)).fill('<i class="bi bi-star-fill text-warning"></i>').join('')}
-                            <span class="ms-1 fw-semibold">${land.rating.toFixed(1)}</span>
-                        </div>
                         <button class="btn btn-success btn-sm" onclick="window.viewLandDetails('${land.id}')">
                             View Details
                         </button>

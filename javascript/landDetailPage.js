@@ -200,15 +200,107 @@ function getJwtToken() {
     return localStorage.getItem('token');
 }
 
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
-}
-
 function redirectToLogin() {
     window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+}
+
+// Purchase Status Check Functions
+function checkIfLandPurchased() {
+    const isPurchased = localStorage.getItem('isPurchased') === 'true';
+    
+    if (isPurchased) {
+        // Hide all buy buttons
+        const buyButtons = [
+            elements.mobileQuickContactBtn,
+            elements.mobileContactBtn,
+            elements.desktopContactBtn,
+            elements.ownerContactBtn,
+            elements.mobileFloatingBtn
+        ];
+        
+        buyButtons.forEach(btn => {
+            if (btn) {
+                btn.style.display = 'none';
+            }
+        });
+        
+        // Optionally show a message or alternative button
+        showPurchasedStatusMessage();
+    }
+    
+    // Clear the flag after checking
+    localStorage.removeItem('isPurchased');
+}
+
+function showPurchasedStatusMessage() {
+    // You can add a message or change the button text
+    const ownerInfoSection = document.querySelector('.bg-white.rounded-3.shadow-sm.p-4.mb-4');
+    if (ownerInfoSection && elements.ownerContactBtn) {
+        // Replace the buy button with a status message
+        elements.ownerContactBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Already Purchased';
+        elements.ownerContactBtn.classList.remove('btn-success');
+        elements.ownerContactBtn.classList.add('btn-secondary');
+        elements.ownerContactBtn.disabled = true;
+    }
+}
+
+async function checkUserPurchaseStatus() {
+    const token = getJwtToken();
+    if (!token || !currentLand) return;
+    
+    try {
+        // Fetch user's purchase requests
+        const response = await fetch('http://72.61.169.226/user/land-purchase', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.message && data.data) {
+                // Check if current land is in the user's purchase requests
+                const hasPurchased = data.data.some(purchase => 
+                    purchase.land_id === currentLand.land_id
+                );
+                
+                if (hasPurchased) {
+                    hideBuyButtons();
+                    showPurchasedStatusMessage();
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error checking purchase status:', error);
+    }
+}
+
+function hideBuyButtons() {
+    const buyButtons = [
+        elements.mobileQuickContactBtn,
+        elements.mobileContactBtn,
+        elements.desktopContactBtn,
+        elements.ownerContactBtn,
+        elements.mobileFloatingBtn
+    ];
+    
+    buyButtons.forEach(btn => {
+        if (btn) {
+            btn.style.display = 'none';
+        }
+    });
+    
+    // Also hide the purchase confirmation modal trigger
+    const purchaseModalTriggers = [elements.mobileQuickContactBtn, elements.mobileContactBtn, 
+                                   elements.desktopContactBtn, elements.ownerContactBtn, 
+                                   elements.mobileFloatingBtn];
+    
+    purchaseModalTriggers.forEach(trigger => {
+        if (trigger) {
+            trigger.removeEventListener('click', openPurchaseConfirmation);
+        }
+    });
 }
 
 // Purchase Request Functions
@@ -301,7 +393,7 @@ async function submitPurchaseRequest() {
         };
         
         // Send POST request
-        const response = await fetch('http://localhost:5000/user/land-purchase', {
+        const response = await fetch('http://72.61.169.226/user/land-purchase', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -927,9 +1019,20 @@ function shareProperty() {
     }
 }
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize function with purchase status check
+function initialize() {
     initializeElements();
     initializeEventListeners();
-    loadLandData();
-});
+    
+    // Check both local storage flag and API for purchase status
+    checkIfLandPurchased();
+    loadLandData().then(() => {
+        // After land data is loaded, check purchase status from API
+        if (currentLand) {
+            checkUserPurchaseStatus();
+        }
+    });
+}
+
+// Update the DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', initialize);
