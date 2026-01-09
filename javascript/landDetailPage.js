@@ -14,7 +14,7 @@ function proxyUrl(url) {
     if (!url || url === 'null' || url === 'undefined') return "";
     
     if (url.startsWith("http://") || url.startsWith("https://")) {
-        if (url.includes('localhost:5000')) {
+        if (url.includes('72.61.169.226')) {
             const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
             if (isLocalhost) {
                 return `/api/proxy?url=${encodeURIComponent(url)}`;
