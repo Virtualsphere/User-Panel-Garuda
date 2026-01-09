@@ -8,31 +8,23 @@ let errorToast = null;
 
 const base_url = '/api/proxy?url=http://72.61.169.226';
 
-// DOM Elements
 let elements = {};
 
-// Enhanced Proxy Function
 function proxyUrl(url) {
     if (!url || url === 'null' || url === 'undefined') return "";
     
-    // If URL is already a complete URL
     if (url.startsWith("http://") || url.startsWith("https://")) {
-        // For backend URLs, use proxy
-        if (url.includes('72.61.169.226')) {
-            // Check if we're in development or production
+        if (url.includes('localhost:5000')) {
             const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
             if (isLocalhost) {
                 return `/api/proxy?url=${encodeURIComponent(url)}`;
             } else {
-                // For Vercel deployment, use absolute path
                 return `/api/proxy?url=${encodeURIComponent(url)}`;
             }
         }
-        // For external URLs (Unsplash, etc.), use directly
         return url;
     }
     
-    // If URL is relative or incomplete
     if (url.startsWith('/')) {
         const fullUrl = `${base_url}${url}`;
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -43,7 +35,6 @@ function proxyUrl(url) {
         }
     }
     
-    // Default - assume it's a relative path from backend
     const fullUrl = `${base_url}/${url}`;
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     if (isLocalhost) {
@@ -53,7 +44,6 @@ function proxyUrl(url) {
     }
 }
 
-// Safe URL function for links that might open in new tab
 function safeUrl(url) {
     if (!url || url === 'null' || url === 'undefined') return "#";
     return proxyUrl(url);
@@ -94,26 +84,21 @@ function formatLocation(location) {
     return parts.length > 0 ? parts.join(', ') : 'Location not specified';
 }
 
-// Initialize DOM Elements
 function initializeElements() {
     elements = {
-        // Mobile Menu
         mobileMenu: document.getElementById('mobileMenu'),
         openMobileMenu: document.getElementById('openMobileMenu'),
         closeMobileMenu: document.getElementById('closeMobileMenu'),
         
-        // Navigation Buttons
         backToLandingBtn: document.getElementById('backToLandingBtn'),
         backToLandingDesktopBtn: document.getElementById('backToLandingDesktopBtn'),
         backToLandingErrorBtn: document.getElementById('backToLandingErrorBtn'),
         
-        // Loading States
         loadingState: document.getElementById('loadingState'),
         errorState: document.getElementById('errorState'),
         errorMessage: document.getElementById('errorMessage'),
         propertyContent: document.getElementById('propertyContent'),
         
-        // Property Header Elements
         mobilePropertyHeader: document.getElementById('mobilePropertyHeader'),
         mobilePropertyTitle: document.getElementById('mobilePropertyTitle'),
         mobilePropertyLocation: document.getElementById('mobilePropertyLocation'),
@@ -124,7 +109,6 @@ function initializeElements() {
         desktopPropertyPrice: document.getElementById('desktopPropertyPrice'),
         desktopPropertyPricePerAcre: document.getElementById('desktopPropertyPricePerAcre'),
         
-        // Image Gallery Elements
         mainImage: document.getElementById('mainImage'),
         mainImageContainer: document.getElementById('mainImageContainer'),
         prevImageBtn: document.getElementById('prevImageBtn'),
@@ -133,7 +117,6 @@ function initializeElements() {
         totalImagesSpan: document.getElementById('totalImages'),
         thumbnailsRow: document.getElementById('thumbnailsRow'),
         
-        // Modal Elements
         modalImage: document.getElementById('modalImage'),
         modalImageIndex: document.getElementById('modalImageIndex'),
         modalTotalImages: document.getElementById('modalTotalImages'),
@@ -141,7 +124,6 @@ function initializeElements() {
         modalNextBtn: document.getElementById('modalNextBtn'),
         modalImageContainer: document.getElementById('modalImageContainer'),
         
-        // Purchase Modal Elements
         purchaseModalImage: document.getElementById('purchaseModalImage'),
         purchaseModalTitle: document.getElementById('purchaseModalTitle'),
         purchaseModalLocation: document.getElementById('purchaseModalLocation'),
@@ -151,11 +133,9 @@ function initializeElements() {
         confirmPurchaseText: document.getElementById('confirmPurchaseText'),
         confirmPurchaseSpinner: document.getElementById('confirmPurchaseSpinner'),
         
-        // Toast Elements
         toastMessage: document.getElementById('toastMessage'),
         errorToastMessage: document.getElementById('errorToastMessage'),
         
-        // Tab Content Elements
         propertyDescription: document.getElementById('propertyDescription'),
         landArea: document.getElementById('landArea'),
         waterSource: document.getElementById('waterSource'),
@@ -167,7 +147,6 @@ function initializeElements() {
         roadAccess: document.getElementById('roadAccess'),
         roadAccessDetail: document.getElementById('roadAccessDetail'),
         
-        // Document Elements
         passbookLink: document.getElementById('passbookLink'),
         borderMapLink: document.getElementById('borderMapLink'),
         photoCount: document.getElementById('photoCount'),
@@ -175,23 +154,19 @@ function initializeElements() {
         videoSection: document.getElementById('videoSection'),
         propertyVideo: document.getElementById('propertyVideo'),
         
-        // Location Elements
         gpsCoordinates: document.getElementById('gpsCoordinates'),
         pathToLand: document.getElementById('pathToLand'),
         
-        // Owner Elements
         ownerName: document.getElementById('ownerName'),
         ownerPhone: document.getElementById('ownerPhone'),
         ownerEducation: document.getElementById('ownerEducation'),
         ownerAge: document.getElementById('ownerAge'),
         
-        // Legal Elements
         disputeStatus: document.getElementById('disputeStatus'),
         disputeType: document.getElementById('disputeType'),
         landOwnership: document.getElementById('landOwnership'),
         mortgageStatus: document.getElementById('mortgageStatus'),
         
-        // Action Buttons
         mobileQuickContactBtn: document.getElementById('mobileQuickContactBtn'),
         mobileFavoriteBtn: document.getElementById('mobileFavoriteBtn'),
         mobileQuickShareBtn: document.getElementById('mobileQuickShareBtn'),
@@ -209,10 +184,14 @@ function initializeElements() {
         mobileFloatingBtn: document.getElementById('mobileFloatingBtn'),
         retryBtn: document.getElementById('retryBtn'),
         mobileVisitBtn: document.getElementById('mobileVisitBtn'),
-        mobileShareBtn: document.getElementById('mobileShareBtn')
+        mobileShareBtn: document.getElementById('mobileShareBtn'),
+        buyerName: document.getElementById('buyerName'),
+        buyerPhone: document.getElementById('buyerPhone'),
+        buyerDescription: document.getElementById('buyerDescription'),
+        purchaseLandCode: document.getElementById('purchaseLandCode'),
+        purchaseForm: document.getElementById('purchaseForm')
     };
     
-    // Initialize modals
     const modalElement = document.getElementById('imageGalleryModal');
     if (modalElement) {
         imageGalleryModal = new bootstrap.Modal(modalElement);
@@ -223,7 +202,6 @@ function initializeElements() {
         purchaseConfirmationModal = new bootstrap.Modal(purchaseModalElement);
     }
     
-    // Initialize toasts
     const successToastElement = document.getElementById('successToast');
     if (successToastElement) {
         successToast = new bootstrap.Toast(successToastElement, { delay: 5000 });
@@ -235,7 +213,6 @@ function initializeElements() {
     }
 }
 
-// JWT Token Functions
 function getJwtToken() {
     return localStorage.getItem('token');
 }
@@ -244,7 +221,173 @@ function redirectToLogin() {
     window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
 }
 
-// Image Gallery Functions
+function checkIfLandPurchased() {
+    const isPurchased = localStorage.getItem('isPurchased') === 'true';
+    
+    if (isPurchased) {
+        // Hide all buy buttons
+        const buyButtons = [
+            elements.mobileQuickContactBtn,
+            elements.mobileContactBtn,
+            elements.desktopContactBtn,
+            elements.ownerContactBtn,
+            elements.mobileFloatingBtn
+        ];
+        
+        buyButtons.forEach(btn => {
+            if (btn) {
+                btn.style.display = 'none';
+            }
+        });
+        
+        // Optionally show a message or alternative button
+        showPurchasedStatusMessage();
+    }
+    
+    // Clear the flag after checking
+    localStorage.removeItem('isPurchased');
+}
+
+function showPurchasedStatusMessage() {
+    // You can add a message or change the button text
+    const ownerInfoSection = document.querySelector('.bg-white.rounded-3.shadow-sm.p-4.mb-4');
+    if (ownerInfoSection && elements.ownerContactBtn) {
+        // Replace the buy button with a status message
+        elements.ownerContactBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Already Purchased';
+        elements.ownerContactBtn.classList.remove('btn-success');
+        elements.ownerContactBtn.classList.add('btn-secondary');
+        elements.ownerContactBtn.disabled = true;
+    }
+}
+
+async function checkUserPurchaseStatus() {
+    const token = getJwtToken();
+    if (!token || !currentLand) return;
+    
+    try {
+        const response = await fetch('http://72.61.169.226/user/land-purchase', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.message && data.data) {
+                // Check if current land is in the user's purchase requests
+                const hasPurchased = data.data.some(purchase => 
+                    purchase.land_id === currentLand.land_id
+                );
+                
+                if (hasPurchased) {
+                    hideBuyButtons();
+                    showPurchasedStatusMessage();
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error checking purchase status:', error);
+    }
+}
+
+function hideBuyButtons() {
+    const buyButtons = [
+        elements.mobileQuickContactBtn,
+        elements.mobileContactBtn,
+        elements.desktopContactBtn,
+        elements.ownerContactBtn,
+        elements.mobileFloatingBtn
+    ];
+    
+    buyButtons.forEach(btn => {
+        if (btn) {
+            btn.style.display = 'none';
+        }
+    });
+    
+    const purchaseModalTriggers = [elements.mobileQuickContactBtn, elements.mobileContactBtn, 
+                                   elements.desktopContactBtn, elements.ownerContactBtn, 
+                                   elements.mobileFloatingBtn];
+    
+    purchaseModalTriggers.forEach(trigger => {
+        if (trigger) {
+            trigger.removeEventListener('click', openPurchaseConfirmation);
+        }
+    });
+}
+
+function showPurchasedStatusMessage() {
+    // You can add a message or change the button text
+    const ownerInfoSection = document.querySelector('.bg-white.rounded-3.shadow-sm.p-4.mb-4');
+    if (ownerInfoSection && elements.ownerContactBtn) {
+        // Replace the buy button with a status message
+        elements.ownerContactBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Already Purchased';
+        elements.ownerContactBtn.classList.remove('btn-success');
+        elements.ownerContactBtn.classList.add('btn-secondary');
+        elements.ownerContactBtn.disabled = true;
+    }
+}
+
+async function checkUserPurchaseStatus() {
+    const token = getJwtToken();
+    if (!token || !currentLand) return;
+    
+    try {
+        // Fetch user's purchase requests
+        const response = await fetch('http://72.61.169.226/user/land-purchase', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.message && data.data) {
+                // Check if current land is in the user's purchase requests
+                const hasPurchased = data.data.some(purchase => 
+                    purchase.land_id === currentLand.land_id
+                );
+                
+                if (hasPurchased) {
+                    hideBuyButtons();
+                    showPurchasedStatusMessage();
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error checking purchase status:', error);
+    }
+}
+
+function hideBuyButtons() {
+    const buyButtons = [
+        elements.mobileQuickContactBtn,
+        elements.mobileContactBtn,
+        elements.desktopContactBtn,
+        elements.ownerContactBtn,
+        elements.mobileFloatingBtn
+    ];
+    
+    buyButtons.forEach(btn => {
+        if (btn) {
+            btn.style.display = 'none';
+        }
+    });
+    
+    // Also hide the purchase confirmation modal trigger
+    const purchaseModalTriggers = [elements.mobileQuickContactBtn, elements.mobileContactBtn, 
+                                   elements.desktopContactBtn, elements.ownerContactBtn, 
+                                   elements.mobileFloatingBtn];
+    
+    purchaseModalTriggers.forEach(trigger => {
+        if (trigger) {
+            trigger.removeEventListener('click', openPurchaseConfirmation);
+        }
+    });
+}
+
 function updateMainImage() {
     if (!elements.mainImage) return;
     
@@ -287,7 +430,6 @@ function createThumbnails() {
         return;
     }
     
-    // Show up to 4 thumbnails
     const thumbnailsToShow = images.slice(0, 4);
     
     thumbnailsToShow.forEach((image, index) => {
@@ -329,6 +471,29 @@ function prevImage() {
     updateMainImage();
 }
 
+function initializeFormHandling() {
+    if (elements.purchaseForm) {
+        elements.purchaseForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitPurchaseRequest();
+        });
+    }
+    
+    if (elements.confirmPurchaseBtn) {
+        elements.confirmPurchaseBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (elements.purchaseForm && elements.purchaseForm.checkValidity()) {
+                submitPurchaseRequest();
+            } else {
+                if (elements.purchaseForm) {
+                    elements.purchaseForm.reportValidity();
+                }
+            }
+        });
+    }
+}
+
 function openImageGallery() {
     if (images.length === 0 || !imageGalleryModal) return;
     
@@ -351,16 +516,13 @@ function openImageGallery() {
     imageGalleryModal.show();
 }
 
-// Data Loading Functions
 async function loadLandData() {
     showLoading();
     
     try {
-        // Get land_id from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const landId = urlParams.get('id');
         
-        // Also check localStorage (for backward compatibility)
         const storedLandId = localStorage.getItem('landId') || landId;
         
         if (!storedLandId) {
@@ -369,12 +531,10 @@ async function loadLandData() {
         
         console.log('Fetching land data for ID:', storedLandId);
         
-        // Try single land endpoint first
         let response = await fetch(`${base_url}/user/verified/land/${storedLandId}`);
         
         if (!response.ok) {
             console.log('Single land endpoint failed, trying all lands endpoint');
-            // Fallback to fetching all and filtering
             const allResponse = await fetch(`${base_url}/user/verified/land`);
             
             if (!allResponse.ok) {
@@ -384,7 +544,6 @@ async function loadLandData() {
             const allData = await allResponse.json();
             
             if (allData.message && allData.data) {
-                // Find the specific land by ID from the full list
                 const landData = allData.data.find(l => l.land_id === storedLandId);
                 if (landData) {
                     currentLand = landData;
@@ -396,7 +555,6 @@ async function loadLandData() {
                 throw new Error('Invalid API response format');
             }
         } else {
-            // Single land endpoint success
             const data = await response.json();
             
             if (data.message && data.data) {
@@ -407,7 +565,6 @@ async function loadLandData() {
             }
         }
         
-        // Clean up localStorage
         localStorage.removeItem('landId');
         localStorage.removeItem('currentLand');
         
@@ -422,24 +579,20 @@ function renderLandData() {
     
     console.log('Rendering land data:', currentLand);
     
-    // Get all media and apply proxy
     const documentMedia = currentLand.document_media || {};
     
-    // Set images with proxy
     images = (documentMedia.land_photo || []).map(img => proxyUrl(img));
     
     if (elements.totalImagesSpan) {
         elements.totalImagesSpan.textContent = images.length;
     }
     
-    // Get land details
     const landDetails = currentLand.land_details || {};
     const landLocation = currentLand.land_location || {};
     const farmerDetails = currentLand.farmer_details || {};
     const gpsTracking = currentLand.gps_tracking || {};
     const disputeDetails = currentLand.dispute_details || {};
     
-    // Update property header
     const landType = getLandTypeLabel(landDetails.land_type);
     const landArea = landDetails.land_area || '0 acres';
     
@@ -476,14 +629,12 @@ function renderLandData() {
         elements.desktopPropertyPricePerAcre.textContent = pricePerAcre;
     }
     
-    // Update property description
     if (elements.propertyDescription) {
         elements.propertyDescription.textContent = 
             `This ${landArea.toLowerCase()} ${landType.toLowerCase()} is located in the prime area of ${landLocation?.village || 'the region'}, ${landLocation?.district || 'the district'}. 
             The property features excellent connectivity and is suitable for various purposes.`;
     }
     
-    // Update property details
     if (elements.landArea) elements.landArea.textContent = landArea;
     if (elements.waterSource) elements.waterSource.textContent = landDetails.water_source || 'Not specified';
     if (elements.garden) elements.garden.textContent = landDetails.garden || 'No';
@@ -494,7 +645,6 @@ function renderLandData() {
     if (elements.roadAccess) elements.roadAccess.textContent = gpsTracking.road_path || 'Not specified';
     if (elements.roadAccessDetail) elements.roadAccessDetail.textContent = gpsTracking.road_path || 'Not specified';
     
-    // Update document links with proxy
     if (elements.passbookLink && landDetails.passbook_photo) {
         elements.passbookLink.href = safeUrl(landDetails.passbook_photo);
         elements.passbookLink.target = '_blank';
@@ -511,7 +661,6 @@ function renderLandData() {
         elements.borderMapLink.style.display = 'none';
     }
     
-    // Update photo and video counts
     if (elements.photoCount) {
         elements.photoCount.textContent = `${images.length} image${images.length !== 1 ? 's' : ''} available`;
     }
@@ -522,7 +671,6 @@ function renderLandData() {
         elements.videoCount.textContent = `${videoCount} video${videoCount !== 1 ? 's' : ''} available`;
     }
     
-    // Show video section if videos exist
     if (elements.videoSection && videoCount > 0 && elements.propertyVideo) {
         elements.videoSection.classList.remove('d-none');
         const videoUrl = proxyUrl(videoUrls[0]);
@@ -536,7 +684,6 @@ function renderLandData() {
         elements.videoSection.classList.add('d-none');
     }
     
-    // Update location details
     const lat = gpsTracking.latitude;
     const lng = gpsTracking.longitude;
     if (elements.gpsCoordinates) {
@@ -547,19 +694,16 @@ function renderLandData() {
         elements.pathToLand.textContent = disputeDetails.path_to_land || 'Not specified';
     }
     
-    // Update owner information
     if (elements.ownerName) elements.ownerName.textContent = farmerDetails.name || 'Not available';
     if (elements.ownerPhone) elements.ownerPhone.textContent = farmerDetails.phone || 'Not available';
     if (elements.ownerEducation) elements.ownerEducation.textContent = farmerDetails.literacy || 'Not specified';
     if (elements.ownerAge) elements.ownerAge.textContent = farmerDetails.age_group || 'Not specified';
     
-    // Update legal status
     const disputeType = disputeDetails.dispute_type || 'Not specified';
     if (elements.disputeType) {
         elements.disputeType.textContent = disputeType;
     }
     
-    // Update dispute status styling based on type
     if (elements.disputeStatus) {
         if (disputeType.toLowerCase() === 'none' || disputeType.toLowerCase() === 'no') {
             elements.disputeStatus.style.background = '#d1fae5';
@@ -579,15 +723,12 @@ function renderLandData() {
     if (elements.landOwnership) elements.landOwnership.textContent = farmerDetails.land_ownership || 'Not specified';
     if (elements.mortgageStatus) elements.mortgageStatus.textContent = farmerDetails.mortgage || 'Not specified';
     
-    // Initialize image gallery
     updateMainImage();
     createThumbnails();
     
-    // Show content
     showContent();
 }
 
-// UI State Functions
 function showLoading() {
     if (elements.loadingState) elements.loadingState.classList.remove('d-none');
     if (elements.errorState) elements.errorState.classList.add('d-none');
@@ -607,14 +748,12 @@ function showContent() {
     if (elements.propertyContent) elements.propertyContent.classList.remove('d-none');
 }
 
-// Purchase Functions
 function openPurchaseConfirmation() {
     if (!currentLand) {
         showErrorToast('Land information not loaded');
         return;
     }
     
-    // Check if user is logged in
     const token = getJwtToken();
     if (!token) {
         showErrorToast('Please login to make a purchase request');
@@ -622,7 +761,6 @@ function openPurchaseConfirmation() {
         return;
     }
     
-    // Update modal content
     if (elements.purchaseModalImage) {
         elements.purchaseModalImage.src = images.length > 0 ? images[0] : 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=300';
     }
@@ -642,12 +780,24 @@ function openPurchaseConfirmation() {
                                                  elements.mobilePropertyPrice.textContent;
     }
     
-    // Reset land code input
-    if (elements.landCodeInput) {
-        elements.landCodeInput.value = '';
+    if (elements.landCodeInput && currentLand.land_id) {
+        elements.landCodeInput.value = currentLand.land_id;
     }
     
-    // Reset button state
+    if (elements.purchaseLandCode && currentLand.land_id) {
+        elements.purchaseLandCode.textContent = currentLand.land_id;
+    }
+    
+    if (elements.buyerName) {
+        elements.buyerName.value = '';
+    }
+    if (elements.buyerPhone) {
+        elements.buyerPhone.value = '';
+    }
+    if (elements.buyerDescription) {
+        elements.buyerDescription.value = '';
+    }
+    
     if (elements.confirmPurchaseBtn) {
         elements.confirmPurchaseBtn.disabled = false;
     }
@@ -658,7 +808,6 @@ function openPurchaseConfirmation() {
         elements.confirmPurchaseText.textContent = 'Submit Purchase Request';
     }
     
-    // Show modal
     if (purchaseConfirmationModal) {
         purchaseConfirmationModal.show();
     }
@@ -677,7 +826,25 @@ async function submitPurchaseRequest() {
         return;
     }
     
-    // Show loading state
+    if (!elements.buyerName || !elements.buyerName.value.trim()) {
+        showErrorToast('Please enter your name');
+        if (elements.buyerName) elements.buyerName.focus();
+        return;
+    }
+    
+    if (!elements.buyerPhone || !elements.buyerPhone.value.trim()) {
+        showErrorToast('Please enter your phone number');
+        if (elements.buyerPhone) elements.buyerPhone.focus();
+        return;
+    }
+    
+    const phoneRegex = /^[0-9]{10,15}$/;
+    if (!phoneRegex.test(elements.buyerPhone.value.trim().replace(/[\s\-\(\)]/g, ''))) {
+        showErrorToast('Please enter a valid phone number');
+        if (elements.buyerPhone) elements.buyerPhone.focus();
+        return;
+    }
+    
     if (elements.confirmPurchaseBtn) {
         elements.confirmPurchaseBtn.disabled = true;
     }
@@ -689,14 +856,17 @@ async function submitPurchaseRequest() {
     }
     
     try {
-        // Prepare request data
         const requestData = {
             land_id: currentLand.land_id,
             status: 'pending',
-            land_code: elements.landCodeInput ? elements.landCodeInput.value.trim() : ''
+            land_code: elements.landCodeInput ? elements.landCodeInput.value.trim() : currentLand.land_id,
+            name: elements.buyerName.value.trim(),
+            phone: elements.buyerPhone.value.trim(),
+            description: elements.buyerDescription ? elements.buyerDescription.value.trim() : ''
         };
         
-        // Send POST request
+        console.log('Submitting purchase request:', requestData);
+        
         const response = await fetch(`${base_url}/user/land-purchase`, {
             method: 'POST',
             headers: {
@@ -706,7 +876,6 @@ async function submitPurchaseRequest() {
             body: JSON.stringify(requestData)
         });
         
-        // Reset button state
         if (elements.confirmPurchaseBtn) {
             elements.confirmPurchaseBtn.disabled = false;
         }
@@ -720,26 +889,26 @@ async function submitPurchaseRequest() {
         if (response.ok) {
             const data = await response.json();
             
-            // Close modal
             if (purchaseConfirmationModal) {
                 purchaseConfirmationModal.hide();
             }
             
-            // Show success message
-            showSuccessToast(data.message || '✅ Purchase request submitted successfully!');
+            showSuccessToast(data.message || '✅ Purchase request submitted successfully! Our team will contact you soon.');
             
-            // Update UI
             updateUIAfterPurchase();
+            
+            if (elements.purchaseForm) {
+                elements.purchaseForm.reset();
+            }
             
         } else {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            throw new Error(errorData.error || errorData.message || `HTTP error! status: ${response.status}`);
         }
         
     } catch (error) {
         console.error('Error submitting purchase request:', error);
         
-        // Reset button state
         if (elements.confirmPurchaseBtn) {
             elements.confirmPurchaseBtn.disabled = false;
         }
@@ -750,12 +919,11 @@ async function submitPurchaseRequest() {
             elements.confirmPurchaseText.textContent = 'Submit Purchase Request';
         }
         
-        showErrorToast(error.message || 'Failed to submit purchase request');
+        showErrorToast(error.message || 'Failed to submit purchase request. Please try again.');
     }
 }
 
 function updateUIAfterPurchase() {
-    // Update all buy buttons to show "Request Sent"
     const buyButtons = [
         elements.mobileQuickContactBtn,
         elements.mobileContactBtn,
@@ -789,9 +957,7 @@ function showErrorToast(message) {
     }
 }
 
-// Event Handlers
 function initializeEventListeners() {
-    // Mobile Menu
     if (elements.openMobileMenu) {
         elements.openMobileMenu.addEventListener('click', () => {
             if (elements.mobileMenu) {
@@ -808,7 +974,6 @@ function initializeEventListeners() {
         });
     }
 
-    // Navigation
     if (elements.backToLandingBtn) {
         elements.backToLandingBtn.addEventListener('click', () => {
             window.location.href = 'landPage.html';
@@ -827,7 +992,6 @@ function initializeEventListeners() {
         });
     }
 
-    // Image Navigation
     if (elements.prevImageBtn) {
         elements.prevImageBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -846,7 +1010,6 @@ function initializeEventListeners() {
         elements.mainImageContainer.addEventListener('click', openImageGallery);
     }
 
-    // Modal Navigation
     if (elements.modalPrevBtn) {
         elements.modalPrevBtn.addEventListener('click', () => {
             prevImage();
@@ -871,7 +1034,6 @@ function initializeEventListeners() {
         });
     }
 
-    // Buy Land Request Buttons
     const buyButtons = [
         elements.mobileQuickContactBtn,
         elements.mobileContactBtn,
@@ -886,12 +1048,6 @@ function initializeEventListeners() {
         }
     });
 
-    // Confirm Purchase Button
-    if (elements.confirmPurchaseBtn) {
-        elements.confirmPurchaseBtn.addEventListener('click', submitPurchaseRequest);
-    }
-
-    // View on Maps
     if (elements.viewOnMapsBtn) {
         elements.viewOnMapsBtn.addEventListener('click', () => {
             const lat = currentLand?.gps_tracking?.latitude;
@@ -904,7 +1060,6 @@ function initializeEventListeners() {
         });
     }
 
-    // Share Property
     const shareButtons = [
         elements.mobileQuickShareBtn,
         elements.sharePropertyBtn,
@@ -918,7 +1073,6 @@ function initializeEventListeners() {
         }
     });
 
-    // Schedule Visit
     if (elements.scheduleVisitBtn) {
         elements.scheduleVisitBtn.addEventListener('click', () => {
             alert('Site visit scheduling feature coming soon!');
@@ -931,7 +1085,6 @@ function initializeEventListeners() {
         });
     }
 
-    // Other Actions
     if (elements.downloadBrochureBtn) {
         elements.downloadBrochureBtn.addEventListener('click', () => {
             alert('Brochure download feature coming soon!');
@@ -962,7 +1115,6 @@ function initializeEventListeners() {
         });
     }
 
-    // Retry Button
     if (elements.retryBtn) {
         elements.retryBtn.addEventListener('click', loadLandData);
     }
@@ -981,12 +1133,17 @@ function shareProperty() {
     }
 }
 
-// Initialize function
 function initialize() {
     initializeElements();
     initializeEventListeners();
+    initializeFormHandling();
+    checkIfLandPurchased();
+    loadLandData().then(() => {
+        if (currentLand) {
+            checkUserPurchaseStatus();
+        }
+    });
     loadLandData();
 }
 
-// Update the DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', initialize);

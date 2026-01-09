@@ -138,6 +138,9 @@ function proxyUrl(url) {
 }
 
 function formatPrice(price) {
+    if(price==null){
+        price= 0;
+    }
     return `₹${price.toLocaleString('en-IN')}`;
 }
 
@@ -195,29 +198,14 @@ async function fetchLands() {
                     return defaultImages[getLandType(land.land_details.land_type)] || defaultImages.agricultural;
                 };
 
-                const generateTitle = () => {
-                    const acresText = `${acres} Acre${acres !== 1 ? 's' : ''}`;
-                    const typeMap = {
-                        'agricultural': 'Agricultural Land',
-                        'residential': 'Residential Plot',
-                        'development': 'Development Land',
-                        'timber': 'Timber Land',
-                        'industrial': 'Industrial Property',
-                        'recreational': 'Recreational Property'
-                    };
-                    const typeText = typeMap[getLandType(land.land_details.land_type)] || 'Land Property';
-                    
-                    return `${acresText} ${typeText}`;
-                };
-
                 const formatLocation = () => {
                     const loc = land.land_location;
                     return `${loc.village}, ${loc.mandal}, ${loc.district}, ${loc.state}`;
                 };
 
                 return {
-                    id: land.land_id,
-                    title: generateTitle(),
+                    id: land.purchase_request.land_id,
+                    title: land.land_details.land_area + " Land",
                     price: formatPrice(land.land_details.total_land_price),
                     originalPrice: land.land_details.total_land_price,
                     location: formatLocation(),
@@ -228,8 +216,9 @@ async function fetchLands() {
                            getLandType(land.land_details.land_type).slice(1),
                     image: getImage(),
                     rating: 4.5 + (Math.random() * 0.5),
-                    featured: index < 3,
+                    progress: land.purchase_request.status,
                     type: getLandType(land.land_details.land_type),
+                    verified: land.land_location.verification,
                     apiData: land
                 };
             });
@@ -302,9 +291,9 @@ function renderLands() {
                          alt="${land.title}" 
                          class="property-card-img"
                          onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600'">
-                    ${land.featured ? `
+                    ${land.progress ? `
                         <div class="property-featured">
-                            Featured
+                            Pending
                         </div>
                     ` : ''}
                     <div class="property-price">
@@ -330,20 +319,8 @@ function renderLands() {
                         </div>
                         <div class="col-6">
                             <div class="property-detail-item">
-                                <i class="bi bi-tree text-success"></i>
-                                <span>${land.type}</span>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="property-detail-item">
-                                <i class="bi bi-building text-secondary"></i>
-                                <span>${land.zoning}</span>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="property-detail-item">
                                 <i class="bi bi-shield-check text-success"></i>
-                                <span>Verified</span>
+                                <span class="text-truncate d-block">${land.verified}</span>
                             </div>
                         </div>
                     </div>
@@ -356,12 +333,6 @@ function renderLands() {
                     </div>
                     
                     <div class="d-flex justify-content-between align-items-center border-top pt-3">
-                        <div class="d-flex align-items-center">
-                            ${Array(Math.floor(land.rating)).fill().map(() => `
-                                <i class="bi bi-star-fill rating-star me-1"></i>
-                            `).join('')}
-                            <span class="ms-2 small fw-semibold">${land.rating.toFixed(1)}</span>
-                        </div>
                         <button class="btn btn-success btn-sm" onclick="window.viewLandDetails('${land.id}')">
                             View Details
                         </button>

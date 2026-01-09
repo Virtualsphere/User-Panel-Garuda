@@ -1,7 +1,3 @@
-// Sample Data
-const featuredLands = [
-    // This will now be populated from API
-];
 
 const testimonials = [
     {
@@ -24,7 +20,6 @@ const testimonials = [
     }
 ];
 
-// DOM Elements
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const closeMobileMenu = document.getElementById('closeMobileMenu');
 const mobileMenu = document.getElementById('mobileMenu');
@@ -55,7 +50,6 @@ const loginSubmitBtn = document.getElementById('loginSubmitBtn');
 const loginBtnText = document.getElementById('loginBtnText');
 const loginSpinner = document.getElementById('loginSpinner');
 
-// New DOM Elements for User Profile
 const userProfileDropdown = document.getElementById('userProfileDropdown');
 const userInitials = document.getElementById('userInitials');
 const userImage = document.getElementById('userImage');
@@ -76,17 +70,14 @@ const mobileEditProfileBtn = document.getElementById('mobileEditProfileBtn');
 const mobileLandHistoryBtn = document.getElementById('mobileLandHistoryBtn');
 const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
 
-// State
 let currentTestimonialIndex = 0;
 let activeFilter = 'all';
 let currentUser = null;
-let lands = []; // Store API lands data
+let lands = [];
 let filteredLands = [];
 
 const base_url= '/api/proxy?url=http://72.61.169.226';
 
-// Initialize
-// In homePage.js, update the DOMContentLoaded event handler:
 
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
@@ -95,7 +86,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateTestimonial();
 });
 
-// Check if user is logged in
 function checkAuthStatus() {
     const token = localStorage.getItem('token');
     if (token) {
@@ -103,7 +93,6 @@ function checkAuthStatus() {
     }
 }
 
-// Fetch user profile
 async function fetchUserProfile(token) {
     try {
         const response = await fetch(`${base_url}/user/details`, {
@@ -119,7 +108,6 @@ async function fetchUserProfile(token) {
             currentUser = data;
             showUserProfile(data.user);
         } else {
-            // Token might be invalid, clear it
             localStorage.removeItem('token');
         }
     } catch (error) {
@@ -135,10 +123,21 @@ function proxyUrl(url) {
     return url;
 }
 
-// Fetch lands from API
 async function fetchLands() {
     try {
-        const response = await fetch(`${base_url}/user/verified/land`);
+        let response;
+        const token= localStorage.getItem('token');
+        if(token!=null){
+            response = await fetch(`${base_url}/user/verified/land/purchase`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        }else{
+            response = await fetch(`${base_url}/user/verified/land`);
+        }
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -165,21 +164,6 @@ async function fetchLands() {
                     return defaultImages[getLandType(land.land_details.land_type)] || defaultImages.agricultural;
                 };
 
-                const generateTitle = () => {
-                    const acresText = `${acres} Acre${acres !== 1 ? 's' : ''}`;
-                    const typeMap = {
-                        'agricultural': 'Agricultural Land',
-                        'residential': 'Residential Plot',
-                        'development': 'Development Land',
-                        'timber': 'Timber Land',
-                        'industrial': 'Industrial Property',
-                        'recreational': 'Recreational Property'
-                    };
-                    const typeText = typeMap[getLandType(land.land_details.land_type)] || 'Land Property';
-                    
-                    return `${acresText} ${typeText}`;
-                };
-
                 const formatLocation = () => {
                     const loc = land.land_location;
                     return `${loc.village}, ${loc.mandal}, ${loc.district}, ${loc.state}`;
@@ -187,7 +171,7 @@ async function fetchLands() {
 
                 return {
                     id: land.land_id,
-                    title: generateTitle(),
+                    title: land.land_details.land_area + " Land",
                     price: formatPrice(land.land_details.total_land_price),
                     originalPrice: land.land_details.total_land_price,
                     location: formatLocation(),
@@ -205,20 +189,17 @@ async function fetchLands() {
                 };
             });
             
-            // Set filteredLands to all lands initially
             filteredLands = [...lands];
             renderLands();
         }
     } catch (error) {
         console.error('Error fetching lands:', error);
-        // Fallback to static data if API fails
         lands = getFallbackLands();
         filteredLands = [...lands];
         renderLands();
     }
 }
 
-// Helper functions from landPage.js
 function getLandType(type) {
     const typeMap = {
         'agri': 'agricultural',
@@ -235,7 +216,6 @@ function formatPrice(price) {
     return `₹${parseInt(price).toLocaleString('en-IN')}`;
 }
 
-// Fallback static data in case API fails
 function getFallbackLands() {
     return [
         {
@@ -325,22 +305,16 @@ function getFallbackLands() {
     ];
 }
 
-// Show user profile in UI
-// Show user profile in UI
 function showUserProfile(user) {
-    // Hide auth buttons
     if (authButtons) authButtons.style.display = 'none';
     if (authButtons2) authButtons2.style.display = 'none';
     if (mobileAuthButtons) mobileAuthButtons.style.display = 'none';
     
-    // Show user profile
     if (userProfileDropdown) userProfileDropdown.style.display = 'block';
     if (mobileUserProfile) mobileUserProfile.style.display = 'block';
     
-    // Set user initials
     const initials = getInitials(user.name);
     
-    // Always show initials (they'll be hidden if image loads successfully)
     if (userInitials) {
         userInitials.textContent = initials;
         userInitials.style.display = 'flex';
@@ -354,27 +328,22 @@ function showUserProfile(user) {
         dropdownUserImage.style.display = 'flex';
     }
     
-    // Set user name and role
     if (dropdownUserName) dropdownUserName.textContent = user.name;
     if (dropdownUserRole) dropdownUserRole.textContent = user.role || 'User';
     if (mobileUserName) mobileUserName.textContent = user.name;
     if (mobileUserRole) mobileUserRole.textContent = user.role || 'User';
     
-    // Check if user has image
     if (user.image || user.photo) {
         const imageUrl = proxyUrl(user.image || user.photo);
         
-        // Try to load the user's image
         const img = new Image();
         img.onload = () => {
-            // Image loaded successfully - replace initials with image
             if (userInitials) userInitials.style.display = 'none';
             if (userImage) {
                 userImage.style.display = 'block';
                 userImage.innerHTML = `<img src="${imageUrl}" class="user-profile-image" alt="${user.name}" onerror="handleProfileImageError(this, '${initials}')">`;
             }
             
-            // Also update mobile and dropdown images if they exist
             const profileImages = document.querySelectorAll('.user-profile-image');
             profileImages.forEach(imgElement => {
                 imgElement.src = imageUrl;
@@ -382,7 +351,6 @@ function showUserProfile(user) {
         };
         
         img.onerror = () => {
-            // Image failed to load, keep showing initials
             console.warn('Failed to load profile image, showing initials instead');
         };
         
@@ -390,7 +358,6 @@ function showUserProfile(user) {
     }
 }
 
-// Helper function to handle profile image errors
 function handleProfileImageError(imgElement, initials) {
     console.warn('Profile image failed to load:', imgElement.src);
     // You could hide the image and show initials instead
@@ -405,7 +372,6 @@ function handleProfileImageError(imgElement, initials) {
     }
 }
 
-// Helper function to get initials
 function getInitials(name) {
     return name.split(' ')
         .map(word => word[0])
@@ -414,9 +380,7 @@ function getInitials(name) {
         .substring(0, 2);
 }
 
-// Setup Event Listeners
 function setupEventListeners() {
-    // Mobile Menu
     if (mobileMenuBtn) {
         mobileMenuBtn.addEventListener('click', () => {
             if (mobileMenu) mobileMenu.style.display = 'block';
@@ -429,7 +393,6 @@ function setupEventListeners() {
         });
     }
     
-    // Modal Controls
     if (navSignUp) navSignUp.addEventListener('click', () => signupModal.style.display = 'flex');
     if (navSignIn) navSignIn.addEventListener('click', () => loginModal.style.display = 'flex');
     
@@ -449,11 +412,9 @@ function setupEventListeners() {
     
     if (ctaSignUp) ctaSignUp.addEventListener('click', () => signupModal.style.display = 'flex');
     
-    // Close Modals
     if (closeLoginModal) closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
     if (closeSignupModal) closeSignupModal.addEventListener('click', () => signupModal.style.display = 'none');
     
-    // Modal Transitions
     if (openSignupFromLogin) {
         openSignupFromLogin.addEventListener('click', (e) => {
             e.preventDefault();
@@ -470,7 +431,6 @@ function setupEventListeners() {
         });
     }
     
-    // Close modals when clicking outside
     [loginModal, signupModal].forEach(modal => {
         if (modal) {
             modal.addEventListener('click', (e) => {
@@ -481,11 +441,9 @@ function setupEventListeners() {
         }
     });
     
-    // Forms
     if (loginForm) loginForm.addEventListener('submit', handleLogin);
     if (signupForm) signupForm.addEventListener('submit', handleSignup);
     
-    // Testimonials
     if (prevTestimonial) prevTestimonial.addEventListener('click', showPreviousTestimonial);
     if (nextTestimonial) nextTestimonial.addEventListener('click', showNextTestimonial);
     
@@ -496,10 +454,8 @@ function setupEventListeners() {
         });
     });
     
-    // Filter buttons - Update to use API data
     document.querySelectorAll('.btn-outline-secondary, .btn-success').forEach(btn => {
         btn.addEventListener('click', function() {
-            // Update active state
             document.querySelectorAll('.btn-outline-secondary, .btn-success').forEach(b => {
                 b.classList.remove('btn-success');
                 b.classList.add('btn-outline-secondary');
@@ -507,21 +463,18 @@ function setupEventListeners() {
             this.classList.remove('btn-outline-secondary');
             this.classList.add('btn-success');
             
-            // Apply filter
             const filter = this.textContent.toLowerCase();
             activeFilter = filter === 'all' ? 'all' : filter;
             filterLands();
         });
     });
     
-    // User Profile Actions
     if (editProfileBtn) editProfileBtn.addEventListener('click', openEditProfileModal);
     if (mobileEditProfileBtn) mobileEditProfileBtn.addEventListener('click', openEditProfileModal);
     
     if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
     if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', handleLogout);
     
-    // Search functionality
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
@@ -529,7 +482,6 @@ function setupEventListeners() {
         });
     }
     
-    // Find Land button
     const findLandBtn = document.querySelector('a.btn-success[href="landPage.html"]');
     if (findLandBtn) {
         findLandBtn.addEventListener('click', (e) => {
@@ -542,14 +494,12 @@ function setupEventListeners() {
         });
     }
     
-    // Initialize Bootstrap dropdown
     const userProfileBtn = document.getElementById('userProfileBtn');
     if (userProfileBtn && bootstrap) {
         new bootstrap.Dropdown(userProfileBtn);
     }
 }
 
-// Filter lands based on search and active filter
 function filterLands(searchTerm = '') {
     filteredLands = lands.filter(land => {
         const matchesSearch = !searchTerm || 
@@ -565,13 +515,11 @@ function filterLands(searchTerm = '') {
     renderLands();
 }
 
-// Render Lands
 function renderLands() {
     if (!landsGrid) return;
     
     landsGrid.innerHTML = '';
     
-    // Show only 6 lands on homepage
     const landsToShow = filteredLands.slice(0, 6);
     
     landsToShow.forEach(land => {
@@ -618,23 +566,18 @@ function renderLands() {
     });
 }
 
-// Global function to handle view details - similar to landPage.js
 window.viewLandDetails = function(landId) {
     try {
-        // Store only the land ID in localStorage
         localStorage.setItem('landId', landId);
         localStorage.removeItem('isPurchased');
         
-        // Navigate to details page with the land_id
         window.location.href = `html/landDetailPage.html?id=${landId}`;
     } catch (error) {
         console.error('Error storing land data:', error);
-        // Fallback: navigate with ID only
         window.location.href = `html/landDetailPage.html?id=${landId}`;
     }
 };
 
-// Testimonial Functions
 function updateTestimonial() {
     if (!testimonialText || !testimonialName || !testimonialRole) return;
     
@@ -643,7 +586,6 @@ function updateTestimonial() {
     testimonialName.textContent = testimonial.name;
     testimonialRole.textContent = testimonial.role;
     
-    // Update dots
     testimonialDots.forEach((dot, index) => {
         dot.classList.toggle('active', index === currentTestimonialIndex);
     });
@@ -659,10 +601,8 @@ function showNextTestimonial() {
     updateTestimonial();
 }
 
-// Auto-rotate testimonials
 setInterval(showNextTestimonial, 5000);
 
-// Form Handlers
 async function handleLogin(e) {
     e.preventDefault();
     
@@ -676,7 +616,6 @@ async function handleLogin(e) {
         return;
     }
     
-    // Show loading state
     loginBtnText.textContent = 'Signing in...';
     loginSpinner.classList.remove('d-none');
     loginSubmitBtn.disabled = true;
@@ -697,10 +636,8 @@ async function handleLogin(e) {
             loginModal.style.display = 'none';
             loginForm.reset();
             
-            // Fetch and display user profile
             await fetchUserProfile(data.token);
             
-            // Show success message
             showNotification('Login successful!', 'success');
         } else {
             showNotification(data.error || 'Login failed. Please check your credentials.', 'error');
@@ -709,7 +646,6 @@ async function handleLogin(e) {
         console.error('Network error:', err);
         showNotification('Network error. Please try again.', 'error');
     } finally {
-        // Reset button state
         loginBtnText.textContent = 'Sign In';
         loginSpinner.classList.add('d-none');
         loginSubmitBtn.disabled = false;
@@ -771,41 +707,33 @@ async function handleSignup(e) {
         console.error('Network error:', err);
         showNotification('Network error. Please try again.', 'error');
     } finally {
-        // Reset button state
         signupBtnText.textContent = 'CREATE ACCOUNT';
         signupSpinner.classList.add('d-none');
         signupSubmitBtn.disabled = false;
     }
 }
 
-// Handle logout
 function handleLogout() {
     localStorage.removeItem('token');
     currentUser = null;
     
-    // Hide user profile
     if (userProfileDropdown) userProfileDropdown.style.display = 'none';
     if (mobileUserProfile) mobileUserProfile.style.display = 'none';
     
-    // Show auth buttons
     if (authButtons) authButtons.style.display = 'block';
     if (authButtons2) authButtons2.style.display = 'block';
     if (mobileAuthButtons) mobileAuthButtons.style.display = 'block';
     
-    // Close mobile menu if open
     if (mobileMenu) mobileMenu.style.display = 'none';
     
     showNotification('Logged out successfully', 'success');
 }
 
-// Open edit profile modal
 function openEditProfileModal() {
     if (!currentUser) return;
     
-    // Close mobile menu if open
     if (mobileMenu) mobileMenu.style.display = 'none';
     
-    // Create modal HTML
     const modalHTML = `
         <div class="modal-overlay" id="editProfileModalOverlay">
             <div class="modal-container profile-modal">
@@ -874,14 +802,11 @@ function openEditProfileModal() {
         </div>
     `;
     
-    // Add modal to body
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     
-    // Show modal
     const modal = document.getElementById('editProfileModalOverlay');
     modal.style.display = 'flex';
     
-    // Setup modal event listeners
     const closeBtn = document.getElementById('closeEditProfileModal');
     const cancelBtn = document.getElementById('cancelEditBtn');
     const editForm = document.getElementById('editProfileForm');
@@ -907,7 +832,6 @@ function openEditProfileModal() {
     }
 }
 
-// Handle edit profile
 async function handleEditProfile(e) {
     e.preventDefault();
     
@@ -926,13 +850,11 @@ async function handleEditProfile(e) {
     const spinner = document.getElementById('profileSpinner');
     const btnText = saveBtn ? saveBtn.querySelector('span') : null;
     
-    // Show loading
     if (btnText) btnText.textContent = 'Saving...';
     if (spinner) spinner.classList.remove('d-none');
     if (saveBtn) saveBtn.disabled = true;
     
     try {
-        // Update user details
         const response = await fetch(`${base_url}/user/details`, {
             method: 'PUT',
             headers: {
@@ -953,11 +875,9 @@ async function handleEditProfile(e) {
         });
         
         if (response.ok) {
-            // Refresh user data
             await fetchUserProfile(token);
             showNotification('Profile updated successfully', 'success');
             
-            // Close modal
             const modal = document.getElementById('editProfileModalOverlay');
             if (modal) modal.remove();
         } else {
@@ -974,15 +894,12 @@ async function handleEditProfile(e) {
     }
 }
 
-// Notification function
 function showNotification(message, type) {
-    // Remove existing notification
     const existingNotification = document.querySelector('.notification');
     if (existingNotification) {
         existingNotification.remove();
     }
     
-    // Create notification
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.innerHTML = `
@@ -992,15 +909,12 @@ function showNotification(message, type) {
         </div>
     `;
     
-    // Add to body
     document.body.appendChild(notification);
     
-    // Show notification
     setTimeout(() => {
         notification.classList.add('show');
     }, 10);
     
-    // Remove after 3 seconds
     setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => {

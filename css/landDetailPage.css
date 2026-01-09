@@ -392,3 +392,25 @@
 .object-fit-cover {
     object-fit: cover;
 }
+
+/* Add to landDetailPage.css or inline style */
+.form-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
+}
+
+.form-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}

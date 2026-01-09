@@ -163,7 +163,19 @@ function updatePriceRangeDisplay() {
 async function fetchLands() {
     try {
         showLoading();
-        const response = await fetch(`${base_url}/user/verified/land`);
+        let response;
+        const token= localStorage.getItem('token');
+        if(token!=null){
+            response = await fetch(`${base_url}/user/verified/land/purchase`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        }else{
+            response = await fetch(`${base_url}/user/verified/land`);
+        }
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -190,21 +202,6 @@ async function fetchLands() {
                     return defaultImages[getLandType(land.land_details.land_type)] || defaultImages.agricultural;
                 };
 
-                const generateTitle = () => {
-                    const acresText = `${acres} Acre${acres !== 1 ? 's' : ''}`;
-                    const typeMap = {
-                        'agricultural': 'Agricultural Land',
-                        'residential': 'Residential Plot',
-                        'development': 'Development Land',
-                        'timber': 'Timber Land',
-                        'industrial': 'Industrial Property',
-                        'recreational': 'Recreational Property'
-                    };
-                    const typeText = typeMap[getLandType(land.land_details.land_type)] || 'Land Property';
-                    
-                    return `${acresText} ${typeText}`;
-                };
-
                 const formatLocation = () => {
                     const loc = land.land_location;
                     return `${loc.village}, ${loc.mandal}, ${loc.district}, ${loc.state}`;
@@ -212,7 +209,7 @@ async function fetchLands() {
 
                 return {
                     id: land.land_id,
-                    title: generateTitle(),
+                    title: land.land_details.land_area + " Land",
                     price: formatPrice(land.land_details.total_land_price),
                     originalPrice: land.land_details.total_land_price,
                     location: formatLocation(),
@@ -436,10 +433,18 @@ window.viewLandDetails = function(landId) {
     }
 };
 
-// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
     updatePriceRangeDisplay();
+
+    const savedSearch = localStorage.getItem('searchTerm');
+    if (savedSearch) {
+        currentSearchQuery = savedSearch;
+        elements.searchInput.value = savedSearch;
+
+        localStorage.removeItem('searchTerm');
+    }
+
     fetchLands();
 });
 

@@ -547,40 +547,84 @@
     </div>
 
     <!-- Purchase Confirmation Modal -->
-    <div class="modal fade" id="purchaseConfirmationModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-cart-check text-success me-2"></i>
-                        Confirm Land Purchase Request
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Purchase Confirmation Modal -->
+<div class="modal fade" id="purchaseConfirmationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-cart-check text-success me-2"></i>
+                    Confirm Land Purchase Request
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <img id="purchaseModalImage" src="" alt="Property" class="purchase-modal-image mb-3">
+                    <h6 id="purchaseModalTitle" class="fw-bold mb-2"></h6>
+                    <p id="purchaseModalLocation" class="text-muted small mb-3"></p>
+                    <div id="purchaseModalPrice" class="text-success fw-bold fs-5 mb-3"></div>
+                    <div class="purchase-land-code mb-3">
+                        Land Code: <span id="purchaseLandCode" class="fw-bold"></span>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <div class="text-center mb-4">
-                        <img id="purchaseModalImage" src="" alt="Property" class="purchase-modal-image mb-3">
-                        <h6 id="purchaseModalTitle" class="fw-bold mb-2"></h6>
-                        <p id="purchaseModalLocation" class="text-muted small mb-3"></p>
-                        <div id="purchaseModalPrice" class="text-success fw-bold fs-5 mb-3"></div>
+                
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Once submitted, our team will contact you within 24 hours to proceed with the purchase process.
+                </div>
+                
+                <!-- Add form fields here -->
+                <form id="purchaseForm">
+                    <div class="mb-3">
+                        <label for="buyerName" class="form-label">
+                            <i class="bi bi-person me-1"></i>Full Name *
+                        </label>
+                        <input type="text" class="form-control" id="buyerName" 
+                               placeholder="Enter your full name" required>
+                        <div class="form-text">Your name as it appears on official documents</div>
                     </div>
                     
-                    <div class="alert alert-info mb-3">
-                        <i class="bi bi-info-circle me-2"></i>
-                        Once submitted, our team will contact you within 24 hours to proceed with the purchase process.
+                    <div class="mb-3">
+                        <label for="buyerPhone" class="form-label">
+                            <i class="bi bi-telephone me-1"></i>Phone Number *
+                        </label>
+                        <input type="tel" class="form-control" id="buyerPhone" 
+                               placeholder="Enter your phone number" required>
+                        <div class="form-text">We'll contact you on this number</div>
                     </div>
                     
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-success" id="confirmPurchaseBtn">
-                        <span id="confirmPurchaseText">Submit Purchase Request</span>
-                        <span id="confirmPurchaseSpinner" class="spinner-border spinner-border-sm ms-2 d-none"></span>
-                    </button>
-                </div>
+                    <div class="mb-3">
+                        <label for="buyerDescription" class="form-label">
+                            <i class="bi bi-chat-text me-1"></i>Additional Notes
+                        </label>
+                        <textarea class="form-control" id="buyerDescription" 
+                                  rows="3" 
+                                  placeholder="Any specific requirements or questions about this property..."></textarea>
+                        <div class="form-text">Optional: Purpose of purchase, timeline, etc.</div>
+                    </div>
+                    
+                    <!-- Keep existing land code input if needed -->
+                    <div class="mb-3">
+                        <label for="landCodeInput" class="form-label">
+                            <i class="bi bi-key me-1"></i>Land Reference Code *
+                        </label>
+                        <input type="text" class="form-control" id="landCodeInput" 
+                               value="" readonly>
+                        <div class="form-text">Unique identifier for this property</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmPurchaseBtn">
+                    <span id="confirmPurchaseText">Submit Purchase Request</span>
+                    <span id="confirmPurchaseSpinner" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+                </button>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Success Toast -->
     <div id="successToast" class="toast align-items-center text-bg-success border-0 position-fixed top-0 end-0 m-3" style="z-index: 1100;">
