@@ -306,7 +306,7 @@ async function loadHeroBanner() {
         if (data.data.image) {
             const heroSection = document.querySelector('.hero-section');
             heroSection.style.backgroundImage = 
-                `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('${data.data.image}')`;
+                `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('${proxyUrl(data.data.image)}')`;
         }
     } catch (error) {
         console.error("Failed to load banner image:", error);
