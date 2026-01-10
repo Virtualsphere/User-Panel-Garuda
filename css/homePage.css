@@ -13,8 +13,6 @@ body {
 
 /* Hero Section */
 .hero-section {
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -483,4 +481,35 @@ body {
 /* Animation for accordion */
 .accordion-collapse {
     transition: all 0.3s ease;
+}
+
+/* Testimonial Image Styles */
+.testimonial-image img {
+    transition: transform 0.3s ease;
+}
+
+.testimonial-image img:hover {
+    transform: scale(1.05);
+}
+
+/* Testimonial dots container */
+.testimonial-dot-container {
+    margin: 0 1rem;
+}
+
+.testimonial-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: #d1d5db;
+    border: none;
+    margin: 0 0.25rem;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.testimonial-dot.active {
+    background-color: var(--primary-color);
+    transform: scale(1.2);
 }

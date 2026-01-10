@@ -51,11 +51,16 @@
                 <a href="landPage.html" class="nav-link btn text-decoration-none">Browse Lands</a>
                 <a href="about.html" class="nav-link btn text-decoration-none">About</a>
                 <a href="contact.html" class="nav-link btn text-decoration-none">Contact</a>
+                <button class="btn btn-success btn-sm" onclick="window.location.href='personalLand.html'">
+                    Land Inquiry
+                </button>
             </div>
 
             <!-- Mobile Menu Button -->
             <div class="d-flex align-items-center gap-2 d-md-none">
-                <button class="btn btn-success btn-sm">Inquiry</button>
+                <button class="btn btn-success btn-sm" onclick="window.location.href='personalLand.html'">
+                    Land Inquiry
+                </button>
                 <button id="openMobileMenu" class="btn">
                     <i class="bi bi-list fs-4"></i>
                 </button>
@@ -89,6 +94,18 @@
                 <!-- Desktop Filters -->
                 <div class="d-none d-md-flex flex-wrap gap-3 align-items-center">
 
+                    <!-- Land Type Filter 
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="land-type-btn btn btn-sm rounded-pill active" data-type="all">All Types</button>
+                        <button class="land-type-btn btn btn-sm rounded-pill" data-type="agricultural">Agricultural</button>
+                        <button class="land-type-btn btn btn-sm rounded-pill" data-type="residential">Residential</button>
+                        <button class="land-type-btn btn btn-sm rounded-pill" data-type="development">Development</button>
+                        <button class="land-type-btn btn btn-sm rounded-pill" data-type="timber">Timber</button>
+                        <button class="land-type-btn btn btn-sm rounded-pill" data-type="industrial">Industrial</button>
+                        <button class="land-type-btn btn btn-sm rounded-pill" data-type="recreational">Recreational</button>
+                    </div>
+                    -->
+
                     <!-- Price Range Filter -->
                     <div class="bg-white border rounded p-2">
                         <div class="d-flex align-items-center gap-2">
@@ -111,6 +128,7 @@
                 <div id="mobileFilters" class="d-none d-md-none bg-white border rounded p-3 mt-3">
                     <div class="mb-3">
                         <h6 class="fw-semibold mb-2">Land Type</h6>
+                        <!--
                         <div class="row g-2">
                             <div class="col-6">
                                 <button class="land-type-btn-mobile btn btn-sm w-100 active" data-type="all">All Types</button>
@@ -134,6 +152,7 @@
                                 <button class="land-type-btn-mobile btn btn-sm w-100" data-type="recreational">Recreational</button>
                             </div>
                         </div>
+                        -->
                     </div>
                     <div>
                         <h6 class="fw-semibold mb-2" id="mobilePriceRangeValue">Price: Up to ₹100.0 Cr</h6>

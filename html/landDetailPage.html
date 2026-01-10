@@ -425,14 +425,6 @@
                             </div>
                             
                             <div class="owner-detail">
-                                <i class="bi bi-telephone owner-icon"></i>
-                                <div>
-                                    <div id="ownerPhone" class="owner-name"></div>
-                                    <div class="owner-label">Phone Number</div>
-                                </div>
-                            </div>
-                            
-                            <div class="owner-detail">
                                 <i class="bi bi-mortarboard owner-icon"></i>
                                 <div>
                                     <div id="ownerEducation" class="owner-name"></div>
@@ -564,9 +556,6 @@
                     <h6 id="purchaseModalTitle" class="fw-bold mb-2"></h6>
                     <p id="purchaseModalLocation" class="text-muted small mb-3"></p>
                     <div id="purchaseModalPrice" class="text-success fw-bold fs-5 mb-3"></div>
-                    <div class="purchase-land-code mb-3">
-                        Land Code: <span id="purchaseLandCode" class="fw-bold"></span>
-                    </div>
                 </div>
                 
                 <div class="alert alert-info mb-3">
@@ -606,12 +595,8 @@
                     
                     <!-- Keep existing land code input if needed -->
                     <div class="mb-3">
-                        <label for="landCodeInput" class="form-label">
-                            <i class="bi bi-key me-1"></i>Land Reference Code *
-                        </label>
-                        <input type="text" class="form-control" id="landCodeInput" 
+                        <input type="hidden" class="form-control" id="landCodeInput" 
                                value="" readonly>
-                        <div class="form-text">Unique identifier for this property</div>
                     </div>
                 </form>
             </div>

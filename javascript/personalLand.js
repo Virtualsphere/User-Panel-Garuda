@@ -205,7 +205,7 @@ async function fetchLands() {
 
                 return {
                     id: land.purchase_request.land_id,
-                    title: land.land_details.land_area + " Land",
+                    title: land.land_details.land_area + "Acres Land",
                     price: formatPrice(land.land_details.total_land_price),
                     originalPrice: land.land_details.total_land_price,
                     location: formatLocation(),

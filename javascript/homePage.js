@@ -1,25 +1,3 @@
-
-const testimonials = [
-    {
-        name: "James Wilson",
-        text: "Found perfect 100-acre farmland with Garuda. Their expertise in agricultural zoning was invaluable.",
-        role: "Farm Investor",
-        rating: 5
-    },
-    {
-        name: "Linda Martinez",
-        text: "Purchased development land that doubled in value in 3 years. Excellent investment advice!",
-        role: "Property Developer",
-        rating: 5
-    },
-    {
-        name: "Robert Chen",
-        text: "Garuda helped us secure a beautiful lakeside property with all the necessary permits in place.",
-        role: "Vacation Home Buyer",
-        rating: 5
-    }
-];
-
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const closeMobileMenu = document.getElementById('closeMobileMenu');
 const mobileMenu = document.getElementById('mobileMenu');
@@ -70,26 +48,268 @@ const mobileEditProfileBtn = document.getElementById('mobileEditProfileBtn');
 const mobileLandHistoryBtn = document.getElementById('mobileLandHistoryBtn');
 const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
 
-let currentTestimonialIndex = 0;
 let activeFilter = 'all';
 let currentUser = null;
 let lands = [];
 let filteredLands = [];
+let testimonials = [];
+let currentTestimonialIndex = 0;
+
 
 const base_url= '/api/proxy?url=http://72.61.169.226';
-
 
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     checkAuthStatus();
     fetchLands();
     updateTestimonial();
+    loadHeroBanner();
+    fetchTestimonials();
 });
+
+function getFallbackLands() {
+    return [
+        {
+            id: 1,
+            title: "50-Acre Agricultural Paradise",
+            price: "₹750,000",
+            location: "Central Valley, California",
+            acres: 50,
+            waterSource: "Well & Stream",
+            type: "agricultural", // Make sure this is set
+            landType: "agricultural", // Add this
+            zoning: "Agricultural",
+            image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
+            rating: 4.9,
+            featured: true
+        },
+        // ... other fallback lands with landType property
+    ];
+}
+
+async function fetchTestimonials() {
+    try {
+        const response = await fetch(`${base_url}/user/review`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.message && data.data) {
+            testimonials = data.data.map(review => ({
+                id: review.id,
+                name: review.name,
+                text: review.description,
+                role: review.location,
+                rating: parseInt(review.rating),
+                image: proxyUrl(review.image),
+                createdAt: review.created_at
+            }));
+            
+            if (testimonials.length > 0) {
+                currentTestimonialIndex = 0;
+                updateTestimonial();
+                setupTestimonialNavigation();
+                startTestimonialRotation();
+                createTestimonialDots();
+            } else {
+                testimonials = getFallbackTestimonials();
+                createTestimonialDots();
+                updateTestimonial();
+                setupTestimonialNavigation();
+                startTestimonialRotation();
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching testimonials:', error);
+        testimonials = getFallbackTestimonials();
+        createTestimonialDots();
+        updateTestimonial();
+        setupTestimonialNavigation();
+        startTestimonialRotation();
+    }
+}
+
+function setupTestimonialNavigation() {
+    if (prevTestimonial) {
+        prevTestimonial.addEventListener('click', showPreviousTestimonial);
+    }
+    
+    if (nextTestimonial) {
+        nextTestimonial.addEventListener('click', showNextTestimonial);
+    }
+}
+
+function showPreviousTestimonial() {
+    if (testimonials.length === 0) return;
+    currentTestimonialIndex = (currentTestimonialIndex - 1 + testimonials.length) % testimonials.length;
+    updateTestimonial();
+    resetTestimonialRotation(); // Reset timer when manually navigating
+}
+
+function showNextTestimonial() {
+    if (testimonials.length === 0) return;
+    currentTestimonialIndex = (currentTestimonialIndex + 1) % testimonials.length;
+    updateTestimonial();
+    resetTestimonialRotation(); // Reset timer when manually navigating
+}
+
+function resetTestimonialRotation() {
+    if (testimonialInterval) {
+        clearInterval(testimonialInterval);
+    }
+    startTestimonialRotation();
+}
+
+function getFallbackTestimonials() {
+    return [
+        {
+            name: "James Wilson",
+            text: "Found perfect 100-acre farmland with Garuda. Their expertise in agricultural zoning was invaluable.",
+            role: "Farm Investor",
+            rating: 5
+        },
+        {
+            name: "Linda Martinez",
+            text: "Purchased development land that doubled in value in 3 years. Excellent investment advice!",
+            role: "Property Developer",
+            rating: 5
+        },
+        {
+            name: "Robert Chen",
+            text: "Garuda helped us secure a beautiful lakeside property with all the necessary permits in place.",
+            role: "Vacation Home Buyer",
+            rating: 5
+        }
+    ];
+}
+
+function createTestimonialDots() {
+    const dotsContainer = document.querySelector('.testimonial-dot-container');
+    if (!dotsContainer) return;
+    
+    dotsContainer.innerHTML = '';
+    
+    testimonials.forEach((_, index) => {
+        const dot = document.createElement('button');
+        dot.className = `testimonial-dot ${index === 0 ? 'active' : ''}`;
+        dot.addEventListener('click', () => {
+            currentTestimonialIndex = index;
+            updateTestimonial();
+            resetTestimonialRotation();
+        });
+        dotsContainer.appendChild(dot);
+    });
+}
+
+function updateTestimonial() {
+    if (!testimonialText || !testimonialName || !testimonialRole || testimonials.length === 0) return;
+    
+    const testimonial = testimonials[currentTestimonialIndex];
+    
+    testimonialText.textContent = `"${testimonial.text}"`;
+    testimonialName.textContent = testimonial.name;
+    testimonialRole.textContent = testimonial.role;
+    
+    updateRatingStars(testimonial.rating);
+    
+    const dots = document.querySelectorAll('.testimonial-dot');
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentTestimonialIndex);
+    });
+    
+    updateTestimonialImage(testimonial);
+}
+
+function updateRatingStars(rating) {
+    const starsContainer = document.querySelector('.testimonial-stars');
+    if (!starsContainer) {
+        const testimonialCard = document.querySelector('.testimonial-card .text-center');
+        if (testimonialCard) {
+            const starsDiv = document.createElement('div');
+            starsDiv.className = 'text-center mb-4 testimonial-stars';
+            starsDiv.innerHTML = generateStarsHTML(rating);
+            testimonialCard.prepend(starsDiv);
+        }
+    } else {
+        starsContainer.innerHTML = generateStarsHTML(rating);
+    }
+}
+
+function generateStarsHTML(rating) {
+    let starsHTML = '';
+    for (let i = 1; i <= 5; i++) {
+        if (i <= rating) {
+            starsHTML += '<i class="bi bi-star-fill text-warning fs-5"></i>';
+        } else if (i === Math.ceil(rating) && rating % 1 !== 0) {
+            starsHTML += '<i class="bi bi-star-half text-warning fs-5"></i>';
+        } else {
+            starsHTML += '<i class="bi bi-star text-warning fs-5"></i>';
+        }
+    }
+    return starsHTML;
+}
+
+let testimonialInterval;
+function startTestimonialRotation() {
+    if (testimonials.length > 1) {
+        clearInterval(testimonialInterval);
+        testimonialInterval = setInterval(showNextTestimonial, 5000);
+    }
+}
+
+function updateTestimonialImage(testimonial) {
+    const imageContainer = document.querySelector('.testimonial-image');
+    
+    if (testimonial.image) {
+        if (!imageContainer) {
+            const testimonialContent = document.querySelector('.testimonial-card > div');
+            if (testimonialContent) {
+                const imgDiv = document.createElement('div');
+                imgDiv.className = 'testimonial-image mb-4 text-center';
+                imgDiv.innerHTML = `
+                    <img src="${testimonial.image}" 
+                         alt="${testimonial.name}" 
+                         class="rounded-circle"
+                         style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #059669;"
+                         onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=059669&color=fff&size=80'">
+                `;
+                testimonialContent.prepend(imgDiv);
+            }
+        } else {
+            const img = imageContainer.querySelector('img');
+            if (img) {
+                img.src = testimonial.image;
+                img.alt = testimonial.name;
+                img.onerror = function() {
+                    this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=059669&color=fff&size=80`;
+                };
+            }
+        }
+    }
+}
+
 
 function checkAuthStatus() {
     const token = localStorage.getItem('token');
     if (token) {
         fetchUserProfile(token);
+    }
+}
+
+async function loadHeroBanner() {
+    try {
+        const response = await fetch(`${base_url}/user/banner`);
+        const data = await response.json();
+
+        if (data.data.image) {
+            const heroSection = document.querySelector('.hero-section');
+            heroSection.style.backgroundImage = 
+                `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('${data.data.image}')`;
+        }
+    } catch (error) {
+        console.error("Failed to load banner image:", error);
     }
 }
 
@@ -123,6 +343,49 @@ function proxyUrl(url) {
     return url;
 }
 
+function createLandTypeFilters(landTypes) {
+    const filtersContainer = document.querySelector('.d-flex.flex-wrap.justify-content-center.gap-2.mb-4');
+    if (!filtersContainer) return;
+    
+    filtersContainer.innerHTML = '';
+    
+    const allButton = document.createElement('button');
+    allButton.className = 'btn btn-success btn-sm rounded-pill land-filter-btn active';
+    allButton.textContent = 'All';
+    allButton.setAttribute('data-filter', 'all');
+    allButton.setAttribute('data-count', lands.length);
+    filtersContainer.appendChild(allButton);
+    
+    const addedFilters = new Set();
+    
+    landTypes.forEach(landType => {
+        const normalizedType = landType.toLowerCase().trim();
+        
+        if (!normalizedType || addedFilters.has(normalizedType)) {
+            return;
+        }
+        
+        addedFilters.add(normalizedType);
+        
+        const landCount = lands.filter(land => 
+            land.landType && land.landType.toLowerCase().trim() === normalizedType
+        ).length;
+        
+        const filterButton = document.createElement('button');
+        filterButton.className = 'btn btn-outline-secondary btn-sm rounded-pill land-filter-btn';
+        filterButton.textContent = `${capitalizeFirstLetter(landType)} (${landCount})`;
+        filterButton.setAttribute('data-filter', normalizedType);
+        filterButton.setAttribute('data-count', landCount);
+        filtersContainer.appendChild(filterButton);
+    });
+    
+    setupFilterButtons();
+}
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 async function fetchLands() {
     try {
         let response;
@@ -146,7 +409,12 @@ async function fetchLands() {
         const data = await response.json();
         
         if (data.message && data.data) {
+            const landTypesSet = new Set();
             lands = data.data.map((land, index) => {
+                const landType = (land.land_details.land_type || 'Other').trim();
+                if (landType) {
+                    landTypesSet.add(landType);
+                }
                 const acres = parseInt(land.land_details.land_area) || 0;
                 
                 const getImage = () => {
@@ -171,13 +439,13 @@ async function fetchLands() {
 
                 return {
                     id: land.land_id,
-                    title: land.land_details.land_area + " Land",
+                    title: land.land_details.land_area + " Acres Land",
                     price: formatPrice(land.land_details.total_land_price),
                     originalPrice: land.land_details.total_land_price,
                     location: formatLocation(),
                     acres: acres,
                     waterSource: land.land_details.water_source || 'Not specified',
-                    type: land.land_details.land_type,
+                    type: landType,
                     zoning: getLandType(land.land_details.land_type).charAt(0).toUpperCase() + 
                            getLandType(land.land_details.land_type).slice(1),
                     image: getImage(),
@@ -188,16 +456,100 @@ async function fetchLands() {
                     apiData: land
                 };
             });
+            const landTypes = Array.from(landTypesSet).filter(type => type && type.trim() !== '');
             
+            landTypes.sort((a, b) => a.localeCompare(b));
+            
+            createLandTypeFilters(landTypes);
+            
+            populateLandTypeDropdown(landTypes);
             filteredLands = [...lands];
             renderLands();
         }
     } catch (error) {
         console.error('Error fetching lands:', error);
         lands = getFallbackLands();
+        const landTypesSet = new Set(lands.map(land => land.type));
+        const landTypes = Array.from(landTypesSet).filter(type => type && type.trim() !== '');
+        landTypes.sort((a, b) => a.localeCompare(b));
+        createLandTypeFilters(landTypes);
+        populateLandTypeDropdown(landTypes);
         filteredLands = [...lands];
         renderLands();
     }
+}
+
+function populateLandTypeDropdown(landTypes) {
+    const dropdown = document.getElementById('landTypeFilter');
+    if (!dropdown) return;
+    
+    dropdown.innerHTML = '<option value="all">All Land Types</option>';
+    
+    const addedOptions = new Set();
+    
+    landTypes.forEach(landType => {
+        const normalizedType = landType.toLowerCase().trim();
+        
+        if (!normalizedType || addedOptions.has(normalizedType)) {
+            return;
+        }
+        
+        addedOptions.add(normalizedType);
+        
+        const landCount = lands.filter(land => 
+            land.landType && land.landType.toLowerCase().trim() === normalizedType
+        ).length;
+        
+        const option = document.createElement('option');
+        option.value = normalizedType;
+        option.textContent = `${capitalizeFirstLetter(landType)} (${landCount})`;
+        dropdown.appendChild(option);
+    });
+    
+    dropdown.addEventListener('change', function() {
+        activeFilter = this.value === 'all' ? 'all' : this.value;
+        
+        const filterButtons = document.querySelectorAll('.land-filter-btn');
+        filterButtons.forEach(btn => {
+            const btnFilter = btn.getAttribute('data-filter');
+            if (btnFilter === activeFilter || (btnFilter === 'all' && activeFilter === 'all')) {
+                filterButtons.forEach(b => {
+                    b.classList.remove('btn-success', 'active');
+                    b.classList.add('btn-outline-secondary');
+                });
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-success', 'active');
+            }
+        });
+        
+        filterLands(document.getElementById('searchInput').value);
+    });
+}
+
+function setupFilterButtons() {
+    const filterButtons = document.querySelectorAll('.land-filter-btn');
+    
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            filterButtons.forEach(b => {
+                b.classList.remove('btn-success', 'active');
+                b.classList.add('btn-outline-secondary');
+            });
+            
+            this.classList.remove('btn-outline-secondary');
+            this.classList.add('btn-success', 'active');
+            
+            const filter = this.getAttribute('data-filter');
+            activeFilter = filter === 'all' ? 'all' : filter.toLowerCase();
+            
+            const dropdown = document.getElementById('landTypeFilter');
+            if (dropdown) {
+                dropdown.value = activeFilter;
+            }
+            
+            filterLands();
+        });
+    });
 }
 
 function getLandType(type) {
@@ -444,30 +796,9 @@ function setupEventListeners() {
     if (loginForm) loginForm.addEventListener('submit', handleLogin);
     if (signupForm) signupForm.addEventListener('submit', handleSignup);
     
-    if (prevTestimonial) prevTestimonial.addEventListener('click', showPreviousTestimonial);
-    if (nextTestimonial) nextTestimonial.addEventListener('click', showNextTestimonial);
-    
-    testimonialDots.forEach((dot, index) => {
-        dot.addEventListener('click', () => {
-            currentTestimonialIndex = index;
-            updateTestimonial();
-        });
-    });
-    
-    document.querySelectorAll('.btn-outline-secondary, .btn-success').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.btn-outline-secondary, .btn-success').forEach(b => {
-                b.classList.remove('btn-success');
-                b.classList.add('btn-outline-secondary');
-            });
-            this.classList.remove('btn-outline-secondary');
-            this.classList.add('btn-success');
-            
-            const filter = this.textContent.toLowerCase();
-            activeFilter = filter === 'all' ? 'all' : filter;
-            filterLands();
-        });
-    });
+    if (document.getElementById('landFiltersContainer')) {
+        
+    }
     
     if (editProfileBtn) editProfileBtn.addEventListener('click', openEditProfileModal);
     if (mobileEditProfileBtn) mobileEditProfileBtn.addEventListener('click', openEditProfileModal);
@@ -578,30 +909,6 @@ window.viewLandDetails = function(landId) {
     }
 };
 
-function updateTestimonial() {
-    if (!testimonialText || !testimonialName || !testimonialRole) return;
-    
-    const testimonial = testimonials[currentTestimonialIndex];
-    testimonialText.textContent = `"${testimonial.text}"`;
-    testimonialName.textContent = testimonial.name;
-    testimonialRole.textContent = testimonial.role;
-    
-    testimonialDots.forEach((dot, index) => {
-        dot.classList.toggle('active', index === currentTestimonialIndex);
-    });
-}
-
-function showPreviousTestimonial() {
-    currentTestimonialIndex = (currentTestimonialIndex - 1 + testimonials.length) % testimonials.length;
-    updateTestimonial();
-}
-
-function showNextTestimonial() {
-    currentTestimonialIndex = (currentTestimonialIndex + 1) % testimonials.length;
-    updateTestimonial();
-}
-
-setInterval(showNextTestimonial, 5000);
 
 async function handleLogin(e) {
     e.preventDefault();

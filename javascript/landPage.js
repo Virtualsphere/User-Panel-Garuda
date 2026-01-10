@@ -143,7 +143,7 @@ function formatPrice(price) {
 
 function getLandType(type) {
     const typeMap = {
-        'agri': 'agricultural',
+        'agricultural': 'agricultural',
         'residential': 'residential',
         'commercial': 'development',
         'forest': 'timber',
@@ -209,7 +209,7 @@ async function fetchLands() {
 
                 return {
                     id: land.land_id,
-                    title: land.land_details.land_area + " Land",
+                    title: land.land_details.land_area + "Acres Land",
                     price: formatPrice(land.land_details.total_land_price),
                     originalPrice: land.land_details.total_land_price,
                     location: formatLocation(),

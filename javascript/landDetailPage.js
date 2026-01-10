@@ -10,6 +10,8 @@ const base_url = '/api/proxy?url=http://72.61.169.226';
 
 let elements = {};
 
+let currentUser = null;
+
 function proxyUrl(url) {
     if (!url || url === 'null' || url === 'undefined') return "";
     
@@ -217,8 +219,45 @@ function getJwtToken() {
     return localStorage.getItem('token');
 }
 
+async function fetchUserProfile() {
+    try {
+        const token = getJwtToken();
+        const response = await fetch(`${base_url}/user/details`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            currentUser = data.user; // Store user data globally
+            return currentUser;
+        } else {
+            localStorage.removeItem('token');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+    }
+}
+
 function redirectToLogin() {
-    window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+    window.location.href = 'index.html?redirect=' + encodeURIComponent(window.location.href);
+}
+
+function autoPopulatePurchaseForm() {
+    if (!currentUser) return;
+    
+    if (elements.buyerName) {
+        elements.buyerName.value = currentUser.name || '';
+    }
+    
+    if (elements.buyerPhone) {
+        elements.buyerPhone.value = currentUser.phone || '';
+    }
 }
 
 function checkIfLandPurchased() {
@@ -748,19 +787,7 @@ function showContent() {
     if (elements.propertyContent) elements.propertyContent.classList.remove('d-none');
 }
 
-function openPurchaseConfirmation() {
-    if (!currentLand) {
-        showErrorToast('Land information not loaded');
-        return;
-    }
-    
-    const token = getJwtToken();
-    if (!token) {
-        showErrorToast('Please login to make a purchase request');
-        setTimeout(() => redirectToLogin(), 1500);
-        return;
-    }
-    
+function showPurchaseModal() {
     if (elements.purchaseModalImage) {
         elements.purchaseModalImage.src = images.length > 0 ? images[0] : 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=300';
     }
@@ -788,11 +815,77 @@ function openPurchaseConfirmation() {
         elements.purchaseLandCode.textContent = currentLand.land_id;
     }
     
-    if (elements.buyerName) {
-        elements.buyerName.value = '';
+    autoPopulatePurchaseForm();
+    
+    if (elements.buyerDescription) {
+        elements.buyerDescription.value = '';
     }
-    if (elements.buyerPhone) {
-        elements.buyerPhone.value = '';
+    
+    if (elements.confirmPurchaseBtn) {
+        elements.confirmPurchaseBtn.disabled = false;
+    }
+    if (elements.confirmPurchaseSpinner) {
+        elements.confirmPurchaseSpinner.classList.add('d-none');
+    }
+    if (elements.confirmPurchaseText) {
+        elements.confirmPurchaseText.textContent = 'Submit Purchase Request';
+    }
+    
+    if (purchaseConfirmationModal) {
+        purchaseConfirmationModal.show();
+    }
+}
+
+function openPurchaseConfirmation() {
+    if (!currentLand) {
+        showErrorToast('Land information not loaded');
+        return;
+    }
+    
+    const token = getJwtToken();
+    if (!token) {
+        showErrorToast('Please login to make a purchase request');
+        setTimeout(() => redirectToLogin(), 1500);
+        return;
+    }
+
+    if (!currentUser) {
+        fetchUserProfile().then(user => {
+            if (user) {
+                showPurchaseModal();
+            } else {
+                showErrorToast('Unable to load user profile');
+            }
+        });
+    } else {
+        showPurchaseModal();
+    }
+    
+    if (elements.purchaseModalImage) {
+        elements.purchaseModalImage.src = images.length > 0 ? images[0] : 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=300';
+    }
+    
+    if (elements.purchaseModalTitle) {
+        elements.purchaseModalTitle.textContent = elements.desktopPropertyTitle.textContent || 
+                                                 elements.mobilePropertyTitle.textContent;
+    }
+    
+    if (elements.purchaseModalLocation) {
+        elements.purchaseModalLocation.textContent = elements.desktopPropertyLocation.textContent || 
+                                                    elements.mobilePropertyLocation.textContent;
+    }
+    
+    if (elements.purchaseModalPrice) {
+        elements.purchaseModalPrice.textContent = elements.desktopPropertyPrice.textContent || 
+                                                 elements.mobilePropertyPrice.textContent;
+    }
+    
+    if (elements.landCodeInput && currentLand.land_id) {
+        elements.landCodeInput.value = currentLand.land_id;
+    }
+    
+    if (elements.purchaseLandCode && currentLand.land_id) {
+        elements.purchaseLandCode.textContent = currentLand.land_id;
     }
     if (elements.buyerDescription) {
         elements.buyerDescription.value = '';
@@ -1137,6 +1230,10 @@ function initialize() {
     initializeElements();
     initializeEventListeners();
     initializeFormHandling();
+    const token = getJwtToken();
+    if (token) {
+        fetchUserProfile();
+    }
     checkIfLandPurchased();
     loadLandData().then(() => {
         if (currentLand) {
