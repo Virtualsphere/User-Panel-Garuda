@@ -28,12 +28,18 @@ const elements = {
     clearFiltersBtn: document.getElementById('clearFiltersBtn'),
     mobileSearchBtn: document.getElementById('mobileSearchBtn'),
     homeBtn: document.getElementById('homeBtn'),
+    desktopLandFilters: document.getElementById('desktopLandFilters'),
+    mobileLandFilters: document.getElementById('mobileLandFilters'),
     landTypeBtns: document.querySelectorAll('.land-type-btn'),
     landTypeMobileBtns: document.querySelectorAll('.land-type-btn-mobile'),
     propertyModal: new bootstrap.Modal(document.getElementById('propertyModal')),
     modalTitle: document.getElementById('modalTitle'),
     modalBody: document.getElementById('modalBody')
 };
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
 // Event Listeners
 function initializeEventListeners() {
@@ -75,41 +81,6 @@ function initializeEventListeners() {
         filterLands();
     });
 
-    // Land Type Filters
-    elements.landTypeBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Update active state
-            elements.landTypeBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            // Update mobile buttons
-            const type = btn.dataset.type;
-            elements.landTypeMobileBtns.forEach(mobileBtn => {
-                mobileBtn.classList.toggle('active', mobileBtn.dataset.type === type);
-            });
-            
-            currentSelectedType = type;
-            filterLands();
-        });
-    });
-
-    elements.landTypeMobileBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Update active state
-            elements.landTypeMobileBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            // Update desktop buttons
-            const type = btn.dataset.type;
-            elements.landTypeBtns.forEach(desktopBtn => {
-                desktopBtn.classList.toggle('active', desktopBtn.dataset.type === type);
-            });
-            
-            currentSelectedType = type;
-            filterLands();
-        });
-    });
-
     // Other Buttons
     elements.retryBtn.addEventListener('click', fetchLands);
     elements.clearFiltersBtn.addEventListener('click', clearFilters);
@@ -148,9 +119,12 @@ function getLandType(type) {
         'commercial': 'development',
         'forest': 'timber',
         'industrial': 'industrial',
-        'recreational': 'recreational'
+        'recreational': 'recreational',
+        'agri': 'agricultural',
+        'red': 'red soil',
+        'black': 'black soil'
     };
-    return typeMap[type] || 'agricultural';
+    return typeMap[type] || type || 'agricultural';
 }
 
 function updatePriceRangeDisplay() {
@@ -159,13 +133,103 @@ function updatePriceRangeDisplay() {
     elements.mobilePriceRangeValue.textContent = `Price: ${priceText}`;
 }
 
-// Data Fetching
+function createLandTypeFilters(landTypes) {
+    elements.desktopLandFilters.innerHTML = '';
+    elements.mobileLandFilters.innerHTML = '';
+    
+    const desktopAllButton = document.createElement('button');
+    desktopAllButton.className = 'land-type-btn btn btn-sm rounded-pill active';
+    desktopAllButton.textContent = 'All Types';
+    desktopAllButton.setAttribute('data-type', 'all');
+    desktopAllButton.setAttribute('data-filter', 'all');
+    elements.desktopLandFilters.appendChild(desktopAllButton);
+    
+    const mobileAllDiv = document.createElement('div');
+    mobileAllDiv.className = 'col-6';
+    const mobileAllButton = document.createElement('button');
+    mobileAllButton.className = 'land-type-btn-mobile btn btn-sm w-100 active';
+    mobileAllButton.textContent = 'All Types';
+    mobileAllButton.setAttribute('data-type', 'all');
+    mobileAllButton.setAttribute('data-filter', 'all');
+    mobileAllDiv.appendChild(mobileAllButton);
+    elements.mobileLandFilters.appendChild(mobileAllDiv);
+    
+    const addedFilters = new Set();
+    
+    landTypes.forEach(landType => {
+        const normalizedType = landType.toLowerCase().trim();
+        
+        if (!normalizedType || addedFilters.has(normalizedType)) {
+            return;
+        }
+        
+        addedFilters.add(normalizedType);
+        
+        const desktopButton = document.createElement('button');
+        desktopButton.className = 'land-type-btn btn btn-sm rounded-pill';
+        desktopButton.textContent = capitalizeFirstLetter(landType);
+        desktopButton.setAttribute('data-type', normalizedType);
+        desktopButton.setAttribute('data-filter', normalizedType);
+        elements.desktopLandFilters.appendChild(desktopButton);
+        
+        const mobileDiv = document.createElement('div');
+        mobileDiv.className = 'col-6';
+        const mobileButton = document.createElement('button');
+        mobileButton.className = 'land-type-btn-mobile btn btn-sm w-100';
+        mobileButton.textContent = capitalizeFirstLetter(landType);
+        mobileButton.setAttribute('data-type', normalizedType);
+        mobileButton.setAttribute('data-filter', normalizedType);
+        mobileDiv.appendChild(mobileButton);
+        elements.mobileLandFilters.appendChild(mobileDiv);
+    });
+    
+    setupFilterButtons();
+}
+
+function setupFilterButtons() {
+    const desktopButtons = elements.desktopLandFilters.querySelectorAll('[data-filter]');
+    desktopButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            desktopButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filterType = this.getAttribute('data-filter');
+            const mobileButton = elements.mobileLandFilters.querySelector(`[data-filter="${filterType}"]`);
+            if (mobileButton) {
+                elements.mobileLandFilters.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+                mobileButton.classList.add('active');
+            }
+            
+            currentSelectedType = filterType;
+            filterLands();
+        });
+    });
+    
+    const mobileButtons = elements.mobileLandFilters.querySelectorAll('[data-filter]');
+    mobileButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            mobileButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filterType = this.getAttribute('data-filter');
+            const desktopButton = elements.desktopLandFilters.querySelector(`[data-filter="${filterType}"]`);
+            if (desktopButton) {
+                elements.desktopLandFilters.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+                desktopButton.classList.add('active');
+            }
+            
+            currentSelectedType = filterType;
+            filterLands();
+        });
+    });
+}
+
 async function fetchLands() {
     try {
         showLoading();
         let response;
-        const token= localStorage.getItem('token');
-        if(token!=null){
+        const token = localStorage.getItem('token');
+        if (token != null) {
             response = await fetch(`${base_url}/user/verified/land/purchase`, {
                 method: 'GET',
                 headers: {
@@ -173,7 +237,7 @@ async function fetchLands() {
                     'Content-Type': 'application/json'
                 }
             });
-        }else{
+        } else {
             response = await fetch(`${base_url}/user/verified/land`);
         }
         
@@ -184,7 +248,15 @@ async function fetchLands() {
         const data = await response.json();
         
         if (data.message && data.data) {
+            const landTypesSet = new Set();
+            
             lands = data.data.map((land, index) => {
+                const landType = (land.land_details.land_type || 'Other').trim();
+                
+                if (landType) {
+                    landTypesSet.add(landType);
+                }
+                
                 const acres = parseInt(land.land_details.land_area) || 0;
                 
                 const getImage = () => {
@@ -199,7 +271,7 @@ async function fetchLands() {
                         'development': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600',
                         'recreational': 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?ixlib=rb-4.0.3&auto=format&fit=crop&w=600'
                     };
-                    return defaultImages[getLandType(land.land_details.land_type)] || defaultImages.agricultural;
+                    return defaultImages['agricultural'];
                 };
 
                 const formatLocation = () => {
@@ -209,46 +281,87 @@ async function fetchLands() {
 
                 return {
                     id: land.land_id,
-                    title: land.land_details.land_area + "Acres Land",
+                    title: land.land_details.land_area + " Acres Land",
                     price: formatPrice(land.land_details.total_land_price),
                     originalPrice: land.land_details.total_land_price,
                     location: formatLocation(),
                     acres: acres,
                     waterSource: land.land_details.water_source || 'Not specified',
-                    type: land.land_details.land_type,
-                    zoning: getLandType(land.land_details.land_type).charAt(0).toUpperCase() + 
-                           getLandType(land.land_details.land_type).slice(1),
+                    type: landType,
+                    landType: landType,
+                    zoning: landType.charAt(0).toUpperCase() + landType.slice(1),
                     image: getImage(),
                     rating: 4.5 + (Math.random() * 0.5),
                     featured: index < 3,
-                    type: getLandType(land.land_details.land_type),
                     verified: land.land_location.verification,
                     apiData: land
                 };
             });
+            
+            const landTypes = Array.from(landTypesSet).filter(type => type && type.trim() !== '');
+            
+            landTypes.sort((a, b) => a.localeCompare(b));
+            
+            createLandTypeFilters(landTypes);
             
             filterLands();
         }
     } catch (error) {
         console.error('Error fetching lands:', error);
         showError(error.message);
+        useFallbackData();
     }
 }
 
-// Filtering
+function useFallbackData() {
+    const fallbackLands = [
+        {
+            id: 1,
+            title: "50-Acre Agricultural Paradise",
+            price: "₹750,000",
+            originalPrice: 750000,
+            location: "Central Valley, California",
+            acres: 50,
+            waterSource: "Well & Stream",
+            type: "agricultural",
+            landType: "agricultural",
+            zoning: "Agricultural",
+            image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600",
+            rating: 4.9,
+            featured: true,
+            verified: "Verified"
+        },
+    ];
+    
+    lands = fallbackLands;
+    
+    const landTypesSet = new Set(fallbackLands.map(land => land.type));
+    const landTypes = Array.from(landTypesSet).filter(type => type && type.trim() !== '');
+    landTypes.sort((a, b) => a.localeCompare(b));
+    
+    createLandTypeFilters(landTypes);
+    
+    filterLands();
+}
+
 function filterLands() {
     filteredLands = lands.filter(land => {
-        const matchesSearch = currentSearchQuery === "" || 
-            land.title.toLowerCase().includes(currentSearchQuery.toLowerCase()) ||
-            land.location.toLowerCase().includes(currentSearchQuery.toLowerCase()) ||
-            land.type.toLowerCase().includes(currentSearchQuery.toLowerCase());
+        const landType = land.landType ? land.landType.toLowerCase().trim() : '';
         
-        const matchesType = currentSelectedType === "all" || land.type === currentSelectedType;
+        const matchesSearch = !currentSearchQuery || 
+            (land.title && land.title.toLowerCase().includes(currentSearchQuery.toLowerCase())) ||
+            (land.location && land.location.toLowerCase().includes(currentSearchQuery.toLowerCase())) ||
+            (landType && landType.includes(currentSearchQuery.toLowerCase()));
+        
+        let matchesFilter = true;
+        if (currentSelectedType !== 'all') {
+            matchesFilter = landType === currentSelectedType;
+        }
         
         const matchesPrice = land.originalPrice >= currentPriceRange[0] && 
                            land.originalPrice <= currentPriceRange[1];
         
-        return matchesSearch && matchesType && matchesPrice;
+        return matchesSearch && matchesFilter && matchesPrice;
     });
     
     renderLands();
@@ -263,12 +376,15 @@ function clearFilters() {
     elements.priceRange.value = 1000000000;
     elements.mobilePriceRange.value = 1000000000;
     
-    elements.landTypeBtns.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.type === 'all');
+    const desktopButtons = elements.desktopLandFilters.querySelectorAll('[data-filter]');
+    const mobileButtons = elements.mobileLandFilters.querySelectorAll('[data-filter]');
+    
+    desktopButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-filter') === 'all');
     });
     
-    elements.landTypeMobileBtns.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.type === 'all');
+    mobileButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-filter') === 'all');
     });
     
     updatePriceRangeDisplay();
@@ -331,8 +447,8 @@ function renderLands() {
                     
                     <div class="border-top pt-3 mb-3">
                         <div class="property-detail-item">
-                            <i class="bi bi-person text-success"></i>
-                            <span class="small">Owner: ${land.apiData?.farmer_details?.name || 'Not available'}</span>
+                            <i class="bi bi-geo text-success"></i>
+                            <span class="small">Type: ${capitalizeFirstLetter(land.type)}</span>
                         </div>
                     </div>
                     
@@ -416,8 +532,6 @@ function hideAllStates() {
     elements.noResultsState.classList.add('d-none');
 }
 
-// Global function to handle view details
-// Update the viewLandDetails function in landPage.js
 window.viewLandDetails = function(landId) {
     try {
         // Store only the land ID in localStorage
@@ -438,15 +552,20 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePriceRangeDisplay();
 
     const savedSearch = localStorage.getItem('searchTerm');
+    const savedLandType = localStorage.getItem('landTypeFilter');
+    
     if (savedSearch) {
         currentSearchQuery = savedSearch;
         elements.searchInput.value = savedSearch;
-
         localStorage.removeItem('searchTerm');
+    }
+    
+    if (savedLandType && savedLandType !== 'all') {
+        currentSelectedType = savedLandType;
+        localStorage.removeItem('landTypeFilter');
     }
 
     fetchLands();
 });
 
-// Make function globally available for onclick handlers
 window.showPropertyDetails = showPropertyDetails;

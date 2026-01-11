@@ -290,7 +290,6 @@ function updateTestimonialImage(testimonial) {
     }
 }
 
-
 function checkAuthStatus() {
     const token = localStorage.getItem('token');
     if (token) {
@@ -311,6 +310,33 @@ async function loadHeroBanner() {
     } catch (error) {
         console.error("Failed to load banner image:", error);
     }
+}
+
+function resetFilters() {
+    activeFilter = 'all';
+    
+    const filterButtons = document.querySelectorAll('.land-filter-btn');
+    filterButtons.forEach(btn => {
+        btn.classList.remove('btn-success', 'active');
+        btn.classList.add('btn-outline-secondary');
+        
+        if (btn.getAttribute('data-filter') === 'all') {
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-success', 'active');
+        }
+    });
+    
+    const dropdown = document.getElementById('landTypeFilter');
+    if (dropdown) {
+        dropdown.value = 'all';
+    }
+    
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    
+    filterLands();
 }
 
 async function fetchUserProfile(token) {
@@ -344,7 +370,7 @@ function proxyUrl(url) {
 }
 
 function createLandTypeFilters(landTypes) {
-    const filtersContainer = document.querySelector('.d-flex.flex-wrap.justify-content-center.gap-2.mb-4');
+    const filtersContainer = document.getElementById('landFiltersContainer');
     if (!filtersContainer) return;
     
     filtersContainer.innerHTML = '';
@@ -353,7 +379,6 @@ function createLandTypeFilters(landTypes) {
     allButton.className = 'btn btn-success btn-sm rounded-pill land-filter-btn active';
     allButton.textContent = 'All';
     allButton.setAttribute('data-filter', 'all');
-    allButton.setAttribute('data-count', lands.length);
     filtersContainer.appendChild(allButton);
     
     const addedFilters = new Set();
@@ -367,15 +392,10 @@ function createLandTypeFilters(landTypes) {
         
         addedFilters.add(normalizedType);
         
-        const landCount = lands.filter(land => 
-            land.landType && land.landType.toLowerCase().trim() === normalizedType
-        ).length;
-        
         const filterButton = document.createElement('button');
         filterButton.className = 'btn btn-outline-secondary btn-sm rounded-pill land-filter-btn';
-        filterButton.textContent = `${capitalizeFirstLetter(landType)} (${landCount})`;
+        filterButton.textContent = capitalizeFirstLetter(landType); // No count display
         filterButton.setAttribute('data-filter', normalizedType);
-        filterButton.setAttribute('data-count', landCount);
         filtersContainer.appendChild(filterButton);
     });
     
@@ -389,8 +409,8 @@ function capitalizeFirstLetter(string) {
 async function fetchLands() {
     try {
         let response;
-        const token= localStorage.getItem('token');
-        if(token!=null){
+        const token = localStorage.getItem('token');
+        if(token != null){
             response = await fetch(`${base_url}/user/verified/land/purchase`, {
                 method: 'GET',
                 headers: {
@@ -398,7 +418,7 @@ async function fetchLands() {
                     'Content-Type': 'application/json'
                 }
             });
-        }else{
+        } else {
             response = await fetch(`${base_url}/user/verified/land`);
         }
         
@@ -410,11 +430,14 @@ async function fetchLands() {
         
         if (data.message && data.data) {
             const landTypesSet = new Set();
+            
             lands = data.data.map((land, index) => {
                 const landType = (land.land_details.land_type || 'Other').trim();
+                
                 if (landType) {
                     landTypesSet.add(landType);
                 }
+                
                 const acres = parseInt(land.land_details.land_area) || 0;
                 
                 const getImage = () => {
@@ -429,7 +452,7 @@ async function fetchLands() {
                         'development': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600',
                         'recreational': 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?ixlib=rb-4.0.3&auto=format&fit=crop&w=600'
                     };
-                    return defaultImages[getLandType(land.land_details.land_type)] || defaultImages.agricultural;
+                    return defaultImages['agricultural'];
                 };
 
                 const formatLocation = () => {
@@ -446,23 +469,22 @@ async function fetchLands() {
                     acres: acres,
                     waterSource: land.land_details.water_source || 'Not specified',
                     type: landType,
-                    zoning: getLandType(land.land_details.land_type).charAt(0).toUpperCase() + 
-                           getLandType(land.land_details.land_type).slice(1),
+                    landType: landType,
+                    zoning: landType.charAt(0).toUpperCase() + landType.slice(1),
                     image: getImage(),
                     verified: land.land_location.verification,
                     rating: 4.5 + (Math.random() * 0.5),
-                    featured: index < 3, // First 3 lands are featured
-                    type: getLandType(land.land_details.land_type),
+                    featured: index < 3,
                     apiData: land
                 };
             });
-            const landTypes = Array.from(landTypesSet).filter(type => type && type.trim() !== '');
             
+            const landTypes = Array.from(landTypesSet).filter(type => type && type.trim() !== '');
             landTypes.sort((a, b) => a.localeCompare(b));
             
             createLandTypeFilters(landTypes);
-            
             populateLandTypeDropdown(landTypes);
+            
             filteredLands = [...lands];
             renderLands();
         }
@@ -496,42 +518,50 @@ function populateLandTypeDropdown(landTypes) {
         
         addedOptions.add(normalizedType);
         
-        const landCount = lands.filter(land => 
-            land.landType && land.landType.toLowerCase().trim() === normalizedType
-        ).length;
-        
         const option = document.createElement('option');
         option.value = normalizedType;
-        option.textContent = `${capitalizeFirstLetter(landType)} (${landCount})`;
+        option.textContent = capitalizeFirstLetter(landType);
         dropdown.appendChild(option);
     });
     
-    dropdown.addEventListener('change', function() {
-        activeFilter = this.value === 'all' ? 'all' : this.value;
-        
-        const filterButtons = document.querySelectorAll('.land-filter-btn');
-        filterButtons.forEach(btn => {
-            const btnFilter = btn.getAttribute('data-filter');
-            if (btnFilter === activeFilter || (btnFilter === 'all' && activeFilter === 'all')) {
-                filterButtons.forEach(b => {
-                    b.classList.remove('btn-success', 'active');
-                    b.classList.add('btn-outline-secondary');
-                });
-                btn.classList.remove('btn-outline-secondary');
-                btn.classList.add('btn-success', 'active');
-            }
+    const newDropdown = dropdown.cloneNode(true);
+    dropdown.parentNode.replaceChild(newDropdown, dropdown);
+    
+    const updatedDropdown = document.getElementById('landTypeFilter');
+    if (updatedDropdown) {
+        updatedDropdown.addEventListener('change', function() {
+            activeFilter = this.value === 'all' ? 'all' : this.value;
+            
+            const filterButtons = document.querySelectorAll('.land-filter-btn');
+            filterButtons.forEach(btn => {
+                const btnFilter = btn.getAttribute('data-filter');
+                if (btnFilter === activeFilter || (btnFilter === 'all' && activeFilter === 'all')) {
+                    filterButtons.forEach(b => {
+                        b.classList.remove('btn-success', 'active');
+                        b.classList.add('btn-outline-secondary');
+                    });
+                    btn.classList.remove('btn-outline-secondary');
+                    btn.classList.add('btn-success', 'active');
+                }
+            });
+            
+            filterLands();
         });
-        
-        filterLands(document.getElementById('searchInput').value);
-    });
+    }
 }
 
 function setupFilterButtons() {
     const filterButtons = document.querySelectorAll('.land-filter-btn');
     
     filterButtons.forEach(btn => {
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+    });
+    
+    document.querySelectorAll('.land-filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            filterButtons.forEach(b => {
+            const allButtons = document.querySelectorAll('.land-filter-btn');
+            allButtons.forEach(b => {
                 b.classList.remove('btn-success', 'active');
                 b.classList.add('btn-outline-secondary');
             });
@@ -540,7 +570,7 @@ function setupFilterButtons() {
             this.classList.add('btn-success', 'active');
             
             const filter = this.getAttribute('data-filter');
-            activeFilter = filter === 'all' ? 'all' : filter.toLowerCase();
+            activeFilter = filter === 'all' ? 'all' : filter;
             
             const dropdown = document.getElementById('landTypeFilter');
             if (dropdown) {
@@ -813,14 +843,20 @@ function setupEventListeners() {
         });
     }
     
-    const findLandBtn = document.querySelector('a.btn-success[href="landPage.html"]');
+    const findLandBtn = document.getElementById('findLandBtn') || document.querySelector('a.btn-success[href="landPage.html"]');
     if (findLandBtn) {
         findLandBtn.addEventListener('click', (e) => {
             e.preventDefault();
             const searchTerm = searchInput ? searchInput.value : '';
+            const landTypeFilter = document.getElementById('landTypeFilter') ? document.getElementById('landTypeFilter').value : 'all';
+            
             if (searchTerm) {
                 localStorage.setItem('searchTerm', searchTerm);
             }
+            if (landTypeFilter && landTypeFilter !== 'all') {
+                localStorage.setItem('landTypeFilter', landTypeFilter);
+            }
+            
             window.location.href = 'html/landPage.html';
         });
     }
@@ -832,13 +868,21 @@ function setupEventListeners() {
 }
 
 function filterLands(searchTerm = '') {
+    const searchInput = document.getElementById('searchInput');
+    const currentSearch = searchTerm || (searchInput ? searchInput.value.toLowerCase().trim() : '');
+    
     filteredLands = lands.filter(land => {
-        const matchesSearch = !searchTerm || 
-            land.title.toLowerCase().includes(searchTerm) ||
-            land.location.toLowerCase().includes(searchTerm) ||
-            land.type.toLowerCase().includes(searchTerm);
+        const landType = land.landType ? land.landType.toLowerCase().trim() : '';
         
-        const matchesFilter = activeFilter === 'all' || land.type === activeFilter;
+        const matchesSearch = !currentSearch || 
+            (land.title && land.title.toLowerCase().includes(currentSearch)) ||
+            (land.location && land.location.toLowerCase().includes(currentSearch)) ||
+            (landType && landType.includes(currentSearch));
+        
+        let matchesFilter = true;
+        if (activeFilter !== 'all') {
+            matchesFilter = landType === activeFilter;
+        }
         
         return matchesSearch && matchesFilter;
     });
@@ -850,6 +894,21 @@ function renderLands() {
     if (!landsGrid) return;
     
     landsGrid.innerHTML = '';
+    
+    if (filteredLands.length === 0) {
+        landsGrid.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-search display-1 text-muted mb-3"></i>
+                <h4 class="fw-bold mb-2">No lands found</h4>
+                <p class="text-muted">Try adjusting your search or filter criteria</p>
+                <button class="btn btn-outline-success mt-3" onclick="resetFilters()">
+                    <i class="bi bi-arrow-clockwise me-2"></i>
+                    Reset Filters
+                </button>
+            </div>
+        `;
+        return;
+    }
     
     const landsToShow = filteredLands.slice(0, 6);
     
