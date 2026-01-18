@@ -706,7 +706,9 @@ function renderLandData() {
     
     const videoUrls = documentMedia.land_video || [];
     const videoCount = videoUrls.length;
-    if (elements.videoCount) {
+    if (elements.videoCount == 0) {
+        elements.videoCount.textContent = `${videoCount} No video available`;
+    } else{
         elements.videoCount.textContent = `${videoCount} video${videoCount !== 1 ? 's' : ''} available`;
     }
     
