@@ -410,17 +410,7 @@ async function fetchLands() {
     try {
         let response;
         const token = localStorage.getItem('token');
-        if(token != null){
-            response = await fetch(`${base_url}/user/verified/land/purchase`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-        } else {
             response = await fetch(`${base_url}/user/verified/land`);
-        }
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
