@@ -220,7 +220,7 @@ async function fetchLands() {
                     type: getLandType(land.land_details.land_type),
                     verified: land.land_location.verification,
                     apiData: land,
-                    progress: land.purchase_request.status
+                    progress: land.purchase_request.status,
                 };
             });
             
@@ -292,11 +292,9 @@ function renderLands() {
                          alt="${land.title}" 
                          class="property-card-img"
                          onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600'">
-                    ${land.progress ? `
-                        <div class="property-featured">
-                            Pending
-                        </div>
-                    ` : ''}
+                    <div class="property-featured">
+                        ${land.progress}
+                    </div>
                     <div class="property-price">
                         <span class="fw-bold">${land.price}</span>
                     </div>
