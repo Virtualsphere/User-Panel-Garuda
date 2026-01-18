@@ -219,7 +219,8 @@ async function fetchLands() {
                     progress: land.purchase_request.status,
                     type: getLandType(land.land_details.land_type),
                     verified: land.land_location.verification,
-                    apiData: land
+                    apiData: land,
+                    progress: land.purchase_request.status
                 };
             });
             
