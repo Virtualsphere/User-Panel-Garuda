@@ -245,7 +245,7 @@ async function fetchUserProfile() {
 }
 
 function redirectToLogin() {
-    window.location.href = 'index.html?redirect=' + encodeURIComponent(window.location.href);
+    window.location.href = 'index.html';
 }
 
 function autoPopulatePurchaseForm() {
@@ -706,9 +706,7 @@ function renderLandData() {
     
     const videoUrls = documentMedia.land_video || [];
     const videoCount = videoUrls.length;
-    if (elements.videoCount <= 0) {
-        elements.videoCount.textContent = `No video available`;
-    } else{
+    if (elements.videoCount) {
         elements.videoCount.textContent = `${videoCount} video${videoCount !== 1 ? 's' : ''} available`;
     }
     
