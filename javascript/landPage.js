@@ -388,10 +388,20 @@ function renderLands() {
     if (filteredLands.length === 0) {
         elements.noResultsState.classList.remove('d-none');
         elements.resultCount.textContent = '(0 properties)';
+        if (currentSearchQuery) {
+            const noResultsMsg = elements.noResultsState.querySelector('p');
+            if (noResultsMsg) {
+                noResultsMsg.textContent = `No properties found for "${currentSearchQuery}". Try a different search term.`;
+            }
+        }
         return;
     }
     
     elements.resultCount.textContent = `(${filteredLands.length} properties)`;
+
+     elements.landsGrid.style.display = '';
+    
+    elements.resultCount.textContent = `(${filteredLands.length} properties${currentSearchQuery ? ` for "${currentSearchQuery}"` : ''})`;
     
     elements.landsGrid.innerHTML = filteredLands.map(land => `
         <div class="col-12 col-md-6 col-lg-4">
@@ -520,6 +530,7 @@ function hideAllStates() {
     elements.loadingState.classList.add('d-none');
     elements.errorState.classList.add('d-none');
     elements.noResultsState.classList.add('d-none');
+    elements.landsGrid.style.display = 'none';
 }
 
 window.viewLandDetails = function(landId) {
