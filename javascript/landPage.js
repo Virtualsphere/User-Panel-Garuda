@@ -378,6 +378,9 @@ function clearFilters() {
     });
     
     updatePriceRangeDisplay();
+    
+    // Show the lands grid again when clearing filters
+    elements.landsGrid.classList.remove('d-none');
     filterLands();
 }
 
@@ -385,23 +388,22 @@ function clearFilters() {
 function renderLands() {
     hideAllStates();
     
+    // Always clear the grid first
+    elements.landsGrid.innerHTML = '';
+    
     if (filteredLands.length === 0) {
         elements.noResultsState.classList.remove('d-none');
         elements.resultCount.textContent = '(0 properties)';
-        if (currentSearchQuery) {
-            const noResultsMsg = elements.noResultsState.querySelector('p');
-            if (noResultsMsg) {
-                noResultsMsg.textContent = `No properties found for "${currentSearchQuery}". Try a different search term.`;
-            }
-        }
+        
+        // IMPORTANT: Hide the lands grid container
+        elements.landsGrid.classList.add('d-none');
         return;
     }
     
-    elements.resultCount.textContent = `(${filteredLands.length} properties)`;
-
-     elements.landsGrid.style.display = '';
+    // Show the lands grid
+    elements.landsGrid.classList.remove('d-none');
     
-    elements.resultCount.textContent = `(${filteredLands.length} properties${currentSearchQuery ? ` for "${currentSearchQuery}"` : ''})`;
+    elements.resultCount.textContent = `(${filteredLands.length} properties)`;
     
     elements.landsGrid.innerHTML = filteredLands.map(land => `
         <div class="col-12 col-md-6 col-lg-4">
@@ -518,6 +520,7 @@ function showLoading() {
     elements.errorState.classList.add('d-none');
     elements.noResultsState.classList.add('d-none');
     elements.landsGrid.innerHTML = '';
+    elements.landsGrid.classList.add('d-none');
 }
 
 function showError(message) {
@@ -530,7 +533,7 @@ function hideAllStates() {
     elements.loadingState.classList.add('d-none');
     elements.errorState.classList.add('d-none');
     elements.noResultsState.classList.add('d-none');
-    elements.landsGrid.style.display = 'none';
+    elements.landsGrid.innerHTML = '';
 }
 
 window.viewLandDetails = function(landId) {
