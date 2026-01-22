@@ -1430,7 +1430,7 @@ async function handleResetPassword(e) {
   resetPasswordSubmitBtn.disabled = true;
   
   try {
-    const response = await fetch(`${base_url}/reset/password`, {
+    const response = await fetch(`${base_url}/user/reset/password`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
