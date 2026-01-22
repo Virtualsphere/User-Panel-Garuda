@@ -48,6 +48,20 @@ const mobileEditProfileBtn = document.getElementById('mobileEditProfileBtn');
 const mobileLandHistoryBtn = document.getElementById('mobileLandHistoryBtn');
 const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
 
+const resetPasswordModal = document.getElementById('resetPasswordModal');
+const closeResetPasswordModal = document.getElementById('closeResetPasswordModal');
+const resetPasswordForm = document.getElementById('resetPasswordForm');
+const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+const backToLogin = document.getElementById('backToLogin');
+const resetPasswordSubmitBtn = document.getElementById('resetPasswordSubmitBtn');
+const resetBtnText = document.getElementById('resetBtnText');
+const resetSpinner = document.getElementById('resetSpinner');
+const resetNewPassword = document.getElementById('resetNewPassword');
+const resetConfirmPassword = document.getElementById('resetConfirmPassword');
+const passwordMatchError = document.getElementById('passwordMatchError');
+const toggleNewPassword = document.getElementById('toggleNewPassword');
+const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+
 let activeFilter = 'all';
 let currentUser = null;
 let lands = [];
@@ -832,6 +846,13 @@ function setupEventListeners() {
             filterLands(e.target.value.toLowerCase());
         });
     }
+
+    const openResetPassword = document.getElementById('openResetPassword');
+    if (openResetPassword) {
+    openResetPassword.addEventListener('click', () => {
+        resetPasswordModal.style.display = 'flex';
+    });
+    }
     
     const findLandBtn = document.getElementById('findLandBtn') || document.querySelector('a.btn-success[href="landPage.html"]');
     if (findLandBtn) {
@@ -855,6 +876,65 @@ function setupEventListeners() {
     if (userProfileBtn && bootstrap) {
         new bootstrap.Dropdown(userProfileBtn);
     }
+
+    if (forgotPasswordLink) {
+    forgotPasswordLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      loginModal.style.display = 'none';
+      resetPasswordModal.style.display = 'flex';
+    });
+  }
+  
+  if (backToLogin) {
+    backToLogin.addEventListener('click', (e) => {
+      e.preventDefault();
+      resetPasswordModal.style.display = 'none';
+      loginModal.style.display = 'flex';
+    });
+  }
+  
+  if (closeResetPasswordModal) {
+    closeResetPasswordModal.addEventListener('click', () => {
+      resetPasswordModal.style.display = 'none';
+      resetPasswordForm.reset();
+      passwordMatchError.style.display = 'none';
+      resetPasswordSubmitBtn.disabled = true;
+    });
+  }
+  
+  if (resetPasswordModal) {
+    resetPasswordModal.addEventListener('click', (e) => {
+      if (e.target === resetPasswordModal) {
+        resetPasswordModal.style.display = 'none';
+        resetPasswordForm.reset();
+        passwordMatchError.style.display = 'none';
+        resetPasswordSubmitBtn.disabled = true;
+      }
+    });
+  }
+  
+  if (resetPasswordForm) {
+    // Real-time password validation
+    [resetNewPassword, resetConfirmPassword].forEach(input => {
+      input.addEventListener('input', validatePasswordMatch);
+    });
+    
+    resetPasswordForm.addEventListener('submit', handleResetPassword);
+  }
+  
+  // Toggle password visibility
+  if (toggleNewPassword) {
+    toggleNewPassword.addEventListener('click', () => {
+      togglePasswordVisibility(resetNewPassword, toggleNewPassword);
+    });
+  }
+  
+  if (toggleConfirmPassword) {
+    toggleConfirmPassword.addEventListener('click', () => {
+      togglePasswordVisibility(resetConfirmPassword, toggleConfirmPassword);
+    });
+  }
+
 }
 
 function filterLands(searchTerm = '') {
@@ -1279,4 +1359,121 @@ function showNotification(message, type) {
             }
         }, 300);
     }, 3000);
+}
+
+function validatePasswordMatch() {
+  const newPassword = resetNewPassword.value;
+  const confirmPassword = resetConfirmPassword.value;
+  
+  // Enable/disable submit button based on validation
+  if (newPassword.length >= 6 && confirmPassword.length >= 6) {
+    if (newPassword === confirmPassword) {
+      passwordMatchError.style.display = 'none';
+      resetPasswordSubmitBtn.disabled = false;
+      resetNewPassword.classList.remove('is-invalid');
+      resetConfirmPassword.classList.remove('is-invalid');
+      resetNewPassword.classList.add('is-valid');
+      resetConfirmPassword.classList.add('is-valid');
+    } else {
+      passwordMatchError.style.display = 'block';
+      resetPasswordSubmitBtn.disabled = true;
+      resetNewPassword.classList.remove('is-valid');
+      resetConfirmPassword.classList.remove('is-valid');
+      resetNewPassword.classList.add('is-invalid');
+      resetConfirmPassword.classList.add('is-invalid');
+    }
+  } else {
+    passwordMatchError.style.display = 'none';
+    resetPasswordSubmitBtn.disabled = true;
+    resetNewPassword.classList.remove('is-valid', 'is-invalid');
+    resetConfirmPassword.classList.remove('is-valid', 'is-invalid');
+  }
+}
+
+// Toggle password visibility
+function togglePasswordVisibility(passwordField, toggleButton) {
+  const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+  passwordField.setAttribute('type', type);
+  
+  // Update icon
+  const icon = toggleButton.querySelector('i');
+  if (type === 'password') {
+    icon.classList.remove('bi-eye-slash');
+    icon.classList.add('bi-eye');
+  } else {
+    icon.classList.remove('bi-eye');
+    icon.classList.add('bi-eye-slash');
+  }
+}
+
+// Handle password reset submission
+async function handleResetPassword(e) {
+  e.preventDefault();
+  
+  const identifier = document.getElementById('resetIdentifier').value;
+  const newPassword = document.getElementById('resetNewPassword').value;
+  
+  // Final validation
+  if (!identifier || !newPassword) {
+    showNotification('Please fill in all fields', 'error');
+    return;
+  }
+  
+  if (resetNewPassword.value !== resetConfirmPassword.value) {
+    showNotification('Passwords do not match', 'error');
+    return;
+  }
+  
+  // Show loading state
+  resetBtnText.textContent = 'Resetting...';
+  resetSpinner.classList.remove('d-none');
+  resetPasswordSubmitBtn.disabled = true;
+  
+  try {
+    const response = await fetch(`${base_url}/reset/password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        identifier: identifier.trim(),
+        newPassword: newPassword
+      }),
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      // Success
+      showNotification('Password reset successfully! You can now sign in.', 'success');
+      
+      // Reset form and close modal
+      resetPasswordForm.reset();
+      resetPasswordModal.style.display = 'none';
+      
+      // Show login modal
+      setTimeout(() => {
+        loginModal.style.display = 'flex';
+      }, 500);
+      
+    } else {
+      // Error
+      showNotification(data.error || 'Password reset failed. Please try again.', 'error');
+    }
+    
+  } catch (err) {
+    console.error('Network error:', err);
+    showNotification('Network error. Please check your connection.', 'error');
+    
+  } finally {
+    // Reset button state
+    resetBtnText.textContent = 'Reset Password';
+    resetSpinner.classList.add('d-none');
+    resetPasswordSubmitBtn.disabled = false;
+    
+    // Reset validation styling
+    resetNewPassword.classList.remove('is-valid', 'is-invalid');
+    resetConfirmPassword.classList.remove('is-valid', 'is-invalid');
+    passwordMatchError.style.display = 'none';
+  }
 }
