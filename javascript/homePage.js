@@ -1431,7 +1431,7 @@ async function handleResetPassword(e) {
   
   try {
     const response = await fetch(`${base_url}/reset/password`, {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
