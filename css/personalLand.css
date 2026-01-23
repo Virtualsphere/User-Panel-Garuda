@@ -22,6 +22,26 @@ body {
     display: none;
 }
 
+/* Add to your existing CSS */
+.fab-enquiry {
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transition: all 0.3s ease;
+}
+
+.fab-enquiry:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Keep existing hover-success class */
+.hover-success {
+    transition: color 0.2s ease;
+}
+
+.hover-success:hover {
+    color: var(--success) !important;
+}
+
 .mobile-menu-content {
     height: 100%;
     display: flex;
