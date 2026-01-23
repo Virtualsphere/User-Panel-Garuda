@@ -63,7 +63,6 @@ function initializeEventListeners() {
 
     document.getElementById('enquiryBtnDesktop')?.addEventListener('click', handleEnquiryClick);
     document.getElementById('enquiryBtnMobile')?.addEventListener('click', handleEnquiryClick);
-    document.getElementById('mobileEnquiryFAB')?.addEventListener('click', handleEnquiryClick);
 
     // Filter Toggle
     elements.filterToggle.addEventListener('click', () => {
@@ -209,18 +208,21 @@ function updateAuthUI() {
     const isLoggedIn = isUserLoggedIn();
     const enquiryBtnDesktop = document.getElementById('enquiryBtnDesktop');
     const enquiryBtnMobile = document.getElementById('enquiryBtnMobile');
-    const mobileEnquiryFAB = document.getElementById('mobileEnquiryFAB');
     
     if (enquiryBtnDesktop) {
-        enquiryBtnDesktop.classList.toggle('d-none', !isLoggedIn);
+        if (isLoggedIn) {
+            enquiryBtnDesktop.classList.remove('d-none');
+        } else {
+            enquiryBtnDesktop.classList.add('d-none');
+        }
     }
     
     if (enquiryBtnMobile) {
-        enquiryBtnMobile.classList.toggle('d-none', !isLoggedIn);
-    }
-    
-    if (mobileEnquiryFAB) {
-        mobileEnquiryFAB.classList.toggle('d-none', !isLoggedIn);
+        if (isLoggedIn) {
+            enquiryBtnMobile.classList.remove('d-none');
+        } else {
+            enquiryBtnMobile.classList.add('d-none');
+        }
     }
 }
 
