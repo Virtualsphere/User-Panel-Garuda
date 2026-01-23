@@ -35,8 +35,22 @@ const elements = {
     modalBody: document.getElementById('modalBody')
 };
 
+function handleEnquiryClick() {
+    if (!isUserLoggedIn()) {
+        // Redirect to login page with return URL
+        const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = `../index.html`;
+        return false;
+    }
+    return true;
+}
+
 // Event Listeners
 function initializeEventListeners() {
+
+    document.getElementById('enquiryBtnDesktop')?.addEventListener('click', handleEnquiryClick);
+    document.getElementById('enquiryBtnMobile')?.addEventListener('click', handleEnquiryClick);
+    document.getElementById('mobileEnquiryFAB')?.addEventListener('click', handleEnquiryClick);
     // Mobile Menu
     elements.openMobileMenu.addEventListener('click', () => {
         elements.mobileMenu.style.display = 'block';
@@ -272,6 +286,39 @@ function clearFilters() {
     filterLands();
 }
 
+function updateAuthUI() {
+    const isLoggedIn = isUserLoggedIn();
+    const enquiryBtnDesktop = document.getElementById('enquiryBtnDesktop');
+    const enquiryBtnMobile = document.getElementById('enquiryBtnMobile');
+    const mobileEnquiryFAB = document.getElementById('mobileEnquiryFAB');
+    
+    if (enquiryBtnDesktop) {
+        enquiryBtnDesktop.classList.toggle('d-none', !isLoggedIn);
+    }
+    
+    if (enquiryBtnMobile) {
+        enquiryBtnMobile.classList.toggle('d-none', !isLoggedIn);
+    }
+    
+    if (mobileEnquiryFAB) {
+        mobileEnquiryFAB.classList.toggle('d-none', !isLoggedIn);
+    }
+}
+
+// Add event listener for storage changes (for multi-tab scenarios)
+window.addEventListener('storage', function(e) {
+    if (e.key === 'token') {
+        updateAuthUI();
+    }
+});
+
+//land enquiry
+function isUserLoggedIn() {
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    return !!(token && user);
+}
+
 // Rendering
 function renderLands() {
     hideAllStates();
@@ -432,6 +479,7 @@ window.viewLandDetails = function(landId) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
     updatePriceRangeDisplay();
+    updateAuthUI();
     fetchLands();
 });
 
